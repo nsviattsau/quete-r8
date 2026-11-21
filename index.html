@@ -1,0 +1,178 @@
+<title>Ordinateur de bord R-8</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: une console de vaisseau, un seul écran centré, panneau de mission + jauge d'énergie. Thème sombre assumé (cockpit). */
+:root{
+  --space:#0b1024; --panel:#141b38; --line:#2b3768;
+  --ink:#e8ecff; --dim:#9aa6d6;
+  --cyan:#5fd4ff; --amber:#ffb547; --ok:#4fe3a1; --alert:#ff4f64;
+  --display:"Chakra Petch", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--space);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.45;
+  background-image:radial-gradient(1px 1px at 12% 20%,#fff8 50%,transparent 51%),radial-gradient(1px 1px at 70% 12%,#fff6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 85% 60%,#fff7 50%,transparent 51%),radial-gradient(1px 1px at 30% 80%,#fff5 50%,transparent 51%),radial-gradient(1px 1px at 55% 45%,#fff4 50%,transparent 51%);
+  transition:background-color .2s}
+body.alarm{animation:flash .35s 4}
+@keyframes flash{50%{background-color:#4a0d18}}
+.wrap{max-width:640px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);font-size:15px}
+.step{font-family:var(--display);color:var(--dim);font-size:15px;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.energy{height:14px;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:#0006}
+.energy i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--ok));transition:width .6s}
+.energy-label{font-family:var(--display);font-size:13px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-top:-10px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px;box-shadow:0 0 0 4px #0b10248a,0 0 40px #5fd4ff14}
+.screen-title{font-family:var(--display);font-size:clamp(24px,6vw,32px);line-height:1.15;margin:0;text-wrap:balance}
+.msg{margin:0;font-size:19px}
+.code{font-family:var(--display);font-size:clamp(24px,7vw,34px);letter-spacing:.12em;color:var(--amber);text-align:center;padding:12px;border:1px dashed var(--line);border-radius:10px;font-variant-numeric:tabular-nums;overflow-x:auto}
+.mirror{display:flex;justify-content:center;gap:clamp(10px,4vw,22px);flex-wrap:wrap}
+.pair{display:inline-flex;font-family:var(--display);font-weight:700;font-size:clamp(34px,10vw,48px);color:var(--amber);line-height:1}
+.pair span:last-child{transform:scaleX(-1);display:inline-block}
+.pair.q{color:var(--dim)}
+.answers{display:grid;gap:10px}
+button{font:inherit;cursor:pointer}
+.ans{background:#0b1024;color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:14px 16px;text-align:left;font-size:19px;display:flex;align-items:center;gap:12px;min-height:56px}
+.ans b{font-family:var(--display);color:var(--cyan);min-width:1.4em}
+.ans:hover{border-color:var(--cyan)}
+.ans:focus-visible,.big:focus-visible,.link:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.ans .pair{font-size:30px}
+.big{background:var(--cyan);color:#06122b;border:0;border-radius:12px;padding:16px 20px;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.04em;text-transform:uppercase}
+.big.amber{background:var(--amber)}
+.status{font-family:var(--display);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:16px}
+.status.ok{color:var(--ok)} .status.bad{color:var(--alert)}
+.hide-box{border:2px solid var(--ok);border-radius:12px;padding:16px;font-size:21px;background:#4fe3a112}
+.hide-box small{display:block;font-family:var(--display);font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--ok);margin-bottom:4px}
+.robot{width:120px;height:auto;margin:0 auto;display:block}
+.link{background:none;border:0;color:var(--dim);text-decoration:underline;font-size:14px;align-self:center}
+.parent label{display:block;font-size:14px;color:var(--dim);margin-bottom:4px}
+.parent input{width:100%;box-sizing:border-box;background:#0b1024;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;font-size:16px}
+.parent .row{display:flex;gap:10px;flex-wrap:wrap}
+.note{font-size:14px;color:var(--dim);margin:0}
+@media (prefers-reduced-motion:reduce){body.alarm{animation:none;background-color:#4a0d18}.energy i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">Ordinateur de bord · R-8</div>
+    <div class="step" id="stepLabel"></div>
+  </header>
+  <div class="energy" aria-hidden="true"><i id="energy"></i></div>
+  <div class="energy-label" id="energyLabel">Énergie du robot : 0 %</div>
+  <main class="panel" id="panel" aria-live="polite"></main>
+  <button class="link" id="parentBtn" type="button">Mode parent</button>
+</div>
+
+<script>
+const ROBOT = `<svg class="robot" viewBox="0 0 120 120" aria-hidden="true">
+<line x1="60" y1="8" x2="60" y2="24" stroke="#5fd4ff" stroke-width="3"/><circle cx="60" cy="8" r="5" fill="#ffb547"/>
+<rect x="30" y="24" width="60" height="44" rx="10" fill="#1e2a55" stroke="#5fd4ff" stroke-width="3"/>
+<circle cx="47" cy="44" r="7" fill="#5fd4ff"/><circle cx="73" cy="44" r="7" fill="#5fd4ff"/>
+<rect x="46" y="56" width="28" height="5" rx="2" fill="#ffb547"/>
+<rect x="38" y="72" width="44" height="34" rx="6" fill="#1e2a55" stroke="#5fd4ff" stroke-width="3"/>
+<circle cx="60" cy="89" r="6" fill="#4fe3a1"/></svg>`;
+
+const pair = (d, q) => `<span class="pair${q?' q':''}"><span>${d}</span><span>${d}</span></span>`;
+
+const STEPS = [
+ {title:"Message codé", text:"Le robot R-8 envoie un signal. Chaque lettre est un nombre : A = 1, B = 2, C = 3… Quel mot cache-t-il ?",
+  extra:`<div class="code">12 · 21 · 14 · 5</div>`, answers:["PUCE","LUNE","TUBE"], ok:1,
+  hide:"Sous un coussin du canapé"},
+ {title:"Planète Nature", text:"Je porte ma maison sur mon dos et je laisse une trace qui brille. Qui suis-je ?",
+  answers:["La tortue","Le hérisson","L'escargot"], ok:2, hide:"Dans le panier à chaussures de l'entrée"},
+ {title:"Calendrier spatial", text:"Le robot a noté les premières lettres des mois. Quelle lettre vient ensuite ?",
+  extra:`<div class="code">J F M A M J ?</div>`, answers:["J","A","S"], ok:0, hide:"Derrière les livres de l'étagère"},
+ {title:"Semaine en orbite", text:"Et maintenant les jours de la semaine. Quelle lettre manque ?",
+  extra:`<div class="code">L M M J V S ?</div>`, answers:["L","S","D"], ok:2, hide:"Dans la boîte à jouets de la chambre"},
+ {title:"Miroir magique", text:"Le robot voit les chiffres dans un miroir. Quel dessin vient ensuite ?",
+  extra:`<div class="mirror">${pair(1)}${pair(2)}${pair(3)}${pair(4)}${pair('?',true)}</div>`,
+  answers:[pair(6),pair(5),pair(8)], ok:1, html:true, hide:"Sous la nappe de la table"},
+ {title:"Salle des machines", text:"J'ai des dents, mais je ne mords pas. Je fais tourner mes voisines. Qui suis-je ?",
+  answers:["Le peigne","L'engrenage","La fusée"], ok:1, hide:"Dans la salle de bain, près des serviettes"},
+ {title:"Calcul de roues", text:"Chaque vaisseau-robot a 4 roues. Combien de roues pour 3 vaisseaux ?",
+  answers:["7","10","12"], ok:2, hide:"Dans le placard de la cuisine, en bas"},
+ {title:"Dernier verrou", text:"Je monte, je monte et je ne redescends jamais. Aujourd'hui, c'est ma fête ! Qui suis-je ?",
+  answers:["L'âge","La fusée","L'ascenseur"], ok:0, hide:"Le coffre final, dans le salon"}
+];
+
+const KEY="r8-cachettes";
+function loadHides(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(Array.isArray(s))s.forEach((h,i)=>{if(STEPS[i]&&h)STEPS[i].hide=h});}catch(e){}}
+function saveHides(){try{localStorage.setItem(KEY,JSON.stringify(STEPS.map(s=>s.hide)));}catch(e){}}
+loadHides();
+
+let i=0, actx=null;
+const panel=document.getElementById("panel");
+const LETTERS=["A","B","C","D"];
+
+function audio(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();}catch(e){actx=null}return actx}
+function tone(f1,f2,dur,type){const a=audio();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f1,a.currentTime);o.frequency.linearRampToValueAtTime(f2,a.currentTime+dur);g.gain.setValueAtTime(.15,a.currentTime);g.gain.linearRampToValueAtTime(0,a.currentTime+dur);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+dur)}
+function siren(){for(let k=0;k<3;k++)setTimeout(()=>tone(880,440,.3,"sawtooth"),k*330)}
+function chime(){tone(660,660,.15,"sine");setTimeout(()=>tone(990,990,.25,"sine"),150)}
+
+function setProgress(done){const p=Math.round(done/STEPS.length*100);document.getElementById("energy").style.width=p+"%";document.getElementById("energyLabel").textContent="Énergie du robot : "+p+" %";}
+
+function intro(){
+  document.getElementById("stepLabel").textContent="";
+  setProgress(0);
+  panel.innerHTML=`${ROBOT}<h1 class="screen-title">Mission : sauver R-8</h1>
+  <p class="msg">Alerte ! Le robot R-8 s'est écrasé et ses pièces sont cachées partout dans la maison. Répondez à ses questions pour recharger son énergie et trouver les cachettes.</p>
+  <p class="msg">Attention : une mauvaise réponse provoque une panne, et le robot recule d'une étape !</p>
+  <button class="big" id="go" type="button">Démarrer la mission</button>`;
+  document.getElementById("go").onclick=()=>{audio();chime();i=0;question();};
+}
+
+function question(){
+  const s=STEPS[i];
+  document.getElementById("stepLabel").textContent=`Étape ${i+1} / ${STEPS.length}`;
+  setProgress(i);
+  panel.innerHTML=`<h2 class="screen-title">${s.title}</h2><p class="msg">${s.text}</p>${s.extra||""}
+  <div class="answers">${s.answers.map((a,k)=>`<button class="ans" type="button" data-k="${k}"><b>${LETTERS[k]}</b><span>${a}</span></button>`).join("")}</div>`;
+  panel.querySelectorAll(".ans").forEach(b=>b.onclick=()=>answer(+b.dataset.k));
+}
+
+function answer(k){
+  const s=STEPS[i];
+  if(k===s.ok){
+    chime(); setProgress(i+1);
+    const last=i===STEPS.length-1;
+    panel.innerHTML=`<p class="status ok">Bonne réponse ! Pièce localisée.</p>
+    <div class="hide-box"><small>${last?"Coffre final":"Cachette de la pièce"}</small>${s.hide}</div>
+    <button class="big" id="next" type="button">${last?"On a tout trouvé !":"Pièce trouvée, étape suivante"}</button>`;
+    document.getElementById("next").onclick=()=>{if(last)victory();else{i++;question();}};
+  }else{
+    siren(); document.body.classList.remove("alarm"); void document.body.offsetWidth; document.body.classList.add("alarm");
+    const back=Math.max(0,i-1), moved=back!==i;
+    panel.innerHTML=`<p class="status bad">Erreur système ! Panne d'énergie.</p>
+    <p class="msg">${moved?`R-8 recule à l'étape ${back+1}. Il faut répondre à nouveau !`:"R-8 doit recommencer cette étape."}</p>
+    <button class="big amber" id="retry" type="button">Réparer et continuer</button>`;
+    i=back; setProgress(i);
+    document.getElementById("retry").onclick=question;
+  }
+}
+
+function victory(){
+  document.getElementById("stepLabel").textContent="Mission accomplie";
+  setProgress(STEPS.length);
+  panel.innerHTML=`${ROBOT}<h2 class="screen-title">R-8 est réparé !</h2>
+  <p class="msg">Bravo, équipe de secours ! Assemblez maintenant vos vaisseaux avec les pièces trouvées. Joyeux anniversaire !</p>
+  <button class="big" id="again" type="button">Recommencer</button>`;
+  [0,200,400].forEach((t,n)=>setTimeout(()=>tone(523*(1+n*.25),523*(1+n*.25),.3,"sine"),t));
+  document.getElementById("again").onclick=intro;
+}
+
+function parent(){
+  document.getElementById("stepLabel").textContent="Mode parent";
+  panel.innerHTML=`<h2 class="screen-title">Cachettes</h2>
+  <p class="note">Écrivez où vous cachez chaque pièce. C'est enregistré sur cet appareil uniquement.</p>
+  <div class="parent" style="display:flex;flex-direction:column;gap:12px">${STEPS.map((s,k)=>`<div><label for="h${k}">Étape ${k+1} · ${s.title}</label><input id="h${k}" value="${s.hide.replace(/"/g,"&quot;")}"></div>`).join("")}</div>
+  <div class="row"><button class="big" id="save" type="button">Enregistrer</button><button class="big amber" id="back" type="button">Retour</button></div>
+  <p class="note" id="saved"></p>`;
+  document.getElementById("save").onclick=()=>{STEPS.forEach((s,k)=>{const v=document.getElementById("h"+k).value.trim();if(v)s.hide=v});saveHides();document.getElementById("saved").textContent="Enregistré.";};
+  document.getElementById("back").onclick=intro;
+}
+document.getElementById("parentBtn").onclick=parent;
+intro();
+</script>
