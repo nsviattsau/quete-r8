@@ -1,176 +1,184 @@
-<title>Ordinateur de bord R-8</title>
+<title>Le carnet d'Anatole</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Andika:wght@400;700&display=swap">
 <style>
-/* Layout: une console de vaisseau, un seul écran centré, panneau de mission + jauge d'énergie. Thème sombre assumé (cockpit). */
+/* Layout : une page de cahier d'écolier (réglure Seyès + marge rouge), une question par page, tampons du maître pour juste/faux. Look papier assumé, un seul thème. */
 :root{
-  --space:#0b1024; --panel:#141b38; --line:#2b3768;
-  --ink:#e8ecff; --dim:#9aa6d6;
-  --cyan:#5fd4ff; --amber:#ffb547; --ok:#4fe3a1; --alert:#ff4f64;
-  --display:"Chakra Petch", "Trebuchet MS", system-ui, sans-serif;
-  --body:"Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
-  color-scheme:dark;
+  --desk:#e9e2d2; --paper:#fffdf6; --seyes:#b9cbe8; --seyes-strong:#8fa9d6; --margin:#e0525e;
+  --ink:#1d3a8a; --pencil:#3a3a46; --red:#d1283a; --green:#1f8a4c; --gold:#f2b632;
+  --hand:"Gochi Hand", "Comic Sans MS", "Marker Felt", cursive;
+  --body:"Andika", "Trebuchet MS", system-ui, sans-serif;
+  color-scheme:light;
 }
-html,body{height:100%}
-body{background:var(--space);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.45;
-  background-image:radial-gradient(1px 1px at 12% 20%,#fff8 50%,transparent 51%),radial-gradient(1px 1px at 70% 12%,#fff6 50%,transparent 51%),radial-gradient(1.5px 1.5px at 85% 60%,#fff7 50%,transparent 51%),radial-gradient(1px 1px at 30% 80%,#fff5 50%,transparent 51%),radial-gradient(1px 1px at 55% 45%,#fff4 50%,transparent 51%);
-  transition:background-color .2s}
-body.alarm{animation:flash .35s 4}
-@keyframes flash{50%{background-color:#4a0d18}}
-.wrap{max-width:640px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.brand{font-family:var(--display);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);font-size:15px}
-.step{font-family:var(--display);color:var(--dim);font-size:15px;letter-spacing:.06em;font-variant-numeric:tabular-nums}
-.energy{height:14px;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:#0006}
-.energy i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--ok));transition:width .6s}
-.energy-label{font-family:var(--display);font-size:13px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-top:-10px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px;box-shadow:0 0 0 4px #0b10248a,0 0 40px #5fd4ff14}
-.screen-title{font-family:var(--display);font-size:clamp(24px,6vw,32px);line-height:1.15;margin:0;text-wrap:balance}
-.msg{margin:0;font-size:19px}
-.code{font-family:var(--display);font-size:clamp(24px,7vw,34px);letter-spacing:.12em;color:var(--amber);text-align:center;padding:12px;border:1px dashed var(--line);border-radius:10px;font-variant-numeric:tabular-nums;overflow-x:auto}
+html,body{min-height:100%}
+body{background:var(--desk);color:var(--pencil);font-family:var(--body);font-size:19px;line-height:1.5}
+body.oops .page{animation:shake .45s 2}
+@keyframes shake{20%{transform:translateX(-8px) rotate(-1deg)}40%{transform:translateX(8px) rotate(1deg)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.wrap{max-width:640px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.brand{font-family:var(--hand);font-size:26px;color:var(--ink);transform:rotate(-1.5deg)}
+.step{font-family:var(--hand);font-size:20px;color:var(--pencil);font-variant-numeric:tabular-nums}
+/* barre de progression = règle d'écolier */
+.ruler{position:relative;height:26px;background:var(--gold);border-radius:4px;overflow:hidden;box-shadow:0 2px 0 #c58f15}
+.ruler::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,#5a430a 0 1px,transparent 1px 10px);height:8px;opacity:.6}
+.ruler i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--green);opacity:.85;transition:width .6s}
+.ruler-label{font-family:var(--hand);font-size:18px;color:var(--pencil);margin-top:-6px}
+.page{position:relative;background-color:var(--paper);
+  background-image:linear-gradient(90deg,transparent 52px,var(--margin) 52px 54px,transparent 54px),
+    repeating-linear-gradient(0deg,transparent 0 31px,var(--seyes-strong) 31px 32px),
+    repeating-linear-gradient(0deg,transparent 0 7px,var(--seyes) 7px 8px);
+  border-radius:4px 10px 10px 4px;padding:26px 22px 26px 70px;display:flex;flex-direction:column;gap:16px;
+  box-shadow:0 1px 0 #d8cfb8,0 10px 24px #6b5a3326;min-width:0}
+.page::after{content:"";position:absolute;left:16px;top:20px;bottom:20px;width:14px;background:radial-gradient(circle,var(--desk) 5px,transparent 6px) 0 0/14px 40px repeat-y}
+h1,h2{font-family:var(--hand);font-weight:400;color:var(--ink);margin:0;line-height:1.1;text-wrap:balance}
+h1{font-size:clamp(32px,8vw,44px)} h2{font-size:clamp(28px,7vw,38px)}
+.msg{margin:0}
+.note{font-family:var(--hand);font-size:22px;color:var(--ink);transform:rotate(-1deg);margin:0}
+.code{font-family:var(--hand);font-size:clamp(30px,9vw,44px);letter-spacing:.12em;color:var(--ink);text-align:center;padding:6px;font-variant-numeric:tabular-nums;overflow-x:auto}
 .mirror{display:flex;justify-content:center;gap:clamp(10px,4vw,22px);flex-wrap:wrap}
-.pair{display:inline-flex;font-family:var(--display);font-weight:700;font-size:clamp(34px,10vw,48px);color:var(--amber);line-height:1}
+.pair{display:inline-flex;font-family:var(--hand);font-size:clamp(38px,11vw,52px);color:var(--ink);line-height:1}
 .pair span:last-child{transform:scaleX(-1);display:inline-block}
-.pair.q{color:var(--dim)}
+.pair.q{color:var(--red)}
 .answers{display:grid;gap:10px}
 button{font:inherit;cursor:pointer}
-.ans{background:#0b1024;color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:14px 16px;text-align:left;font-size:19px;display:flex;align-items:center;gap:12px;min-height:56px}
-.ans b{font-family:var(--display);color:var(--cyan);min-width:1.4em}
-.ans:hover{border-color:var(--cyan)}
-.ans:focus-visible,.big:focus-visible,.link:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
-.ans .pair{font-size:30px}
-.big{background:var(--cyan);color:#06122b;border:0;border-radius:12px;padding:16px 20px;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.04em;text-transform:uppercase}
-.big.amber{background:var(--amber)}
-.status{font-family:var(--display);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:16px}
-.status.ok{color:var(--ok)} .status.bad{color:var(--alert)}
-.hide-box{border:2px solid var(--ok);border-radius:12px;padding:16px;font-size:21px;background:#4fe3a112}
-.hide-box small{display:block;font-family:var(--display);font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--ok);margin-bottom:4px}
-.robot{width:120px;height:auto;margin:0 auto;display:block}
-.link{background:none;border:0;color:var(--dim);text-decoration:underline;font-size:14px;align-self:center}
-.parent label{display:block;font-size:14px;color:var(--dim);margin-bottom:4px}
-.parent input{width:100%;box-sizing:border-box;background:#0b1024;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;font-size:16px}
-.parent .row{display:flex;gap:10px;flex-wrap:wrap}
-.note{font-size:14px;color:var(--dim);margin:0}
-@media (prefers-reduced-motion:reduce){body.alarm{animation:none;background-color:#4a0d18}.energy i{transition:none}}
+.ans{background:#fffdf6e6;color:var(--pencil);border:2px solid var(--ink);border-radius:14px 10px 16px 9px;padding:12px 16px;text-align:left;font-size:20px;display:flex;align-items:center;gap:12px;min-height:56px;box-shadow:3px 3px 0 var(--seyes-strong)}
+.ans b{font-family:var(--hand);font-size:26px;color:var(--red);min-width:1.2em;font-weight:400}
+.ans:hover{background:#fff4c4}
+.ans:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--seyes-strong)}
+.ans .pair{font-size:34px}
+.ans:focus-visible,.big:focus-visible,.link:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.big{background:var(--ink);color:var(--paper);border:0;border-radius:14px 10px 14px 10px;padding:14px 20px;font-family:var(--hand);font-size:26px;box-shadow:3px 3px 0 #0e2260}
+.big.red{background:var(--red);box-shadow:3px 3px 0 #8d1523}
+.stamp{align-self:flex-start;font-family:var(--hand);font-size:30px;padding:2px 16px;border:3px solid currentColor;border-radius:10px;transform:rotate(-6deg)}
+.stamp.ok{color:var(--green)} .stamp.bad{color:var(--red)}
+.hide-box{background:#fff4c4;border-radius:2px;padding:14px 16px;font-size:22px;box-shadow:0 3px 8px #6b5a3330;transform:rotate(.8deg)}
+.hide-box small{display:block;font-family:var(--hand);font-size:18px;color:var(--red);margin-bottom:2px}
+.doodle{width:140px;height:auto;align-self:center}
+.link{background:none;border:0;color:var(--pencil);text-decoration:underline;font-size:15px;align-self:center}
+.parent{display:flex;flex-direction:column;gap:12px}
+.parent label{display:block;font-size:15px;margin-bottom:3px}
+.parent input{width:100%;box-sizing:border-box;background:#fff;color:var(--pencil);border:1px solid var(--seyes-strong);border-radius:6px;padding:9px;font:inherit;font-size:17px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.small{font-size:15px;margin:0}
+@media (max-width:420px){.page{padding-left:52px}.page{background-image:linear-gradient(90deg,transparent 38px,var(--margin) 38px 40px,transparent 40px),repeating-linear-gradient(0deg,transparent 0 31px,var(--seyes-strong) 31px 32px),repeating-linear-gradient(0deg,transparent 0 7px,var(--seyes) 7px 8px)}.page::after{left:10px}}
+@media (prefers-reduced-motion:reduce){body.oops .page{animation:none}.ruler i{transition:none}}
 </style>
 
 <div class="wrap">
   <header>
-    <div class="brand">Ordinateur de bord · R-8</div>
+    <div class="brand">Le carnet d'Anatole</div>
     <div class="step" id="stepLabel"></div>
   </header>
-  <div class="energy" aria-hidden="true"><i id="energy"></i></div>
-  <div class="energy-label" id="energyLabel">Énergie du robot : 0 %</div>
-  <main class="panel" id="panel" aria-live="polite"></main>
+  <div class="ruler" aria-hidden="true"><i id="bar"></i></div>
+  <div class="ruler-label" id="barLabel">Pièces retrouvées : 0 sur 8</div>
+  <main class="page" id="page" aria-live="polite"></main>
   <button class="link" id="parentBtn" type="button">Mode parent</button>
 </div>
 
 <script>
-const ROBOT = `<svg class="robot" viewBox="0 0 120 120" aria-hidden="true">
-<line x1="60" y1="8" x2="60" y2="24" stroke="#5fd4ff" stroke-width="3"/><circle cx="60" cy="8" r="5" fill="#ffb547"/>
-<rect x="30" y="24" width="60" height="44" rx="10" fill="#1e2a55" stroke="#5fd4ff" stroke-width="3"/>
-<circle cx="47" cy="44" r="7" fill="#5fd4ff"/><circle cx="73" cy="44" r="7" fill="#5fd4ff"/>
-<rect x="46" y="56" width="28" height="5" rx="2" fill="#ffb547"/>
-<rect x="38" y="72" width="44" height="34" rx="6" fill="#1e2a55" stroke="#5fd4ff" stroke-width="3"/>
-<circle cx="60" cy="89" r="6" fill="#4fe3a1"/></svg>`;
+/* Dessins génériques : une boîte qui déborde (début), une étoile-tampon (fin). Aucun personnage dessiné. */
+const BOX=`<svg class="doodle" viewBox="0 0 140 110" aria-hidden="true" fill="none" stroke="#1d3a8a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+<path d="M28 52 L70 40 L112 52 L112 96 L70 106 L28 96 Z" fill="#fff4c4"/><path d="M28 52 L70 64 L112 52 M70 64 V106"/>
+<path d="M28 52 L14 34 L56 24 L70 40" fill="#fffdf6"/><path d="M112 52 L128 36 L86 26 L70 40" fill="#fffdf6"/>
+<circle cx="40" cy="14" r="5" stroke="#d1283a"/><path d="M60 8 l6 6 m0 -6 l-6 6" stroke="#d1283a"/><rect x="92" y="6" width="9" height="9" stroke="#1f8a4c" transform="rotate(20 96 10)"/><path d="M118 16 q6 -8 10 0" stroke="#d1283a"/></svg>`;
+const STAR=`<svg class="doodle" viewBox="0 0 140 130" aria-hidden="true"><path d="M70 8 L86 48 L130 50 L95 76 L108 120 L70 95 L32 120 L45 76 L10 50 L54 48 Z" fill="#f2b632" stroke="#1d3a8a" stroke-width="4" stroke-linejoin="round"/><text x="70" y="78" text-anchor="middle" font-family="Gochi Hand, cursive" font-size="24" fill="#1d3a8a">Bravo !</text></svg>`;
 
-const pair = (d, q) => `<span class="pair${q?' q':''}"><span>${d}</span><span>${d}</span></span>`;
+const pair=(d,q)=>`<span class="pair${q?' q':''}"><span>${d}</span><span>${d}</span></span>`;
 
-const STEPS = [
- {title:"Message codé", text:"Le robot R-8 envoie un signal. Chaque lettre est un nombre : A = 1, B = 2, C = 3… Quel mot cache-t-il ?",
-  extra:`<div class="code">12 · 21 · 14 · 5</div>`, answers:["PUCE","LUNE","TUBE"], ok:1,
-  hide:"Sous un coussin du canapé"},
- {title:"Planète Nature", text:"Je porte ma maison sur mon dos et je laisse une trace qui brille. Qui suis-je ?",
+const STEPS=[
+ {title:"Le mot secret", text:"Pour que personne ne lise son carnet, Anatole écrit en chiffres : A = 1, B = 2, C = 3… Quel mot a-t-il écrit ?",
+  extra:`<div class="code">12 · 21 · 14 · 5</div>`, answers:["PUCE","LUNE","TUBE"], ok:1, hide:"Sous un coussin du canapé"},
+ {title:"La devinette du jardin", text:"Anatole a trouvé une petite bête dans la cour de l'école : « Je porte ma maison sur mon dos et je laisse une trace qui brille. » Qui est-ce ?",
   answers:["La tortue","Le hérisson","L'escargot"], ok:2, hide:"Dans le panier à chaussures de l'entrée"},
- {title:"Calendrier spatial", text:"Le robot a noté les premières lettres des mois. Quelle lettre vient ensuite ?",
+ {title:"Le calendrier", text:"Anatole a écrit les premières lettres des mois, puis il a eu une idée géniale… et il a oublié la suite ! Quelle lettre vient ensuite ?",
   extra:`<div class="code">J F M A M J ?</div>`, answers:["J","A","S"], ok:0, hide:"Derrière les livres de l'étagère"},
- {title:"Semaine en orbite", text:"Et maintenant les jours de la semaine. Quelle lettre manque ?",
+ {title:"La semaine d'Anatole", text:"Même chose avec les jours de la semaine. Quelle lettre manque ?",
   extra:`<div class="code">L M M J V S ?</div>`, answers:["L","S","D"], ok:2, hide:"Dans la boîte à jouets de la chambre"},
- {title:"Miroir magique", text:"Le robot voit les chiffres dans un miroir. Quel dessin vient ensuite ?",
+ {title:"Les chiffres à l'envers", text:"Anatole a écrit chaque chiffre deux fois : une fois à l'endroit, une fois dans le miroir. Quel dessin vient ensuite ?",
   extra:`<div class="mirror">${pair(1)}${pair(2)}${pair(3)}${pair(4)}${pair('?',true)}</div>`,
   answers:[pair(6),pair(5),pair(8)], ok:1, html:true, hide:"Sous la nappe de la table"},
- {title:"Salle des machines", text:"J'ai des dents, mais je ne mords pas. Je fais tourner mes voisines. Qui suis-je ?",
+ {title:"L'invention", text:"Dans la boîte d'Anatole, il manque une pièce : « J'ai des dents, mais je ne mords pas. Je fais tourner mes voisines. » Qu'est-ce que c'est ?",
   answers:["Le peigne","L'engrenage","La fusée"], ok:1, hide:"Dans la salle de bain, près des serviettes"},
- {title:"Calcul de roues", text:"Chaque vaisseau-robot a 4 roues. Combien de roues pour 3 vaisseaux ?",
+ {title:"Le calcul de roues", text:"Anatole veut construire 3 voitures. Chaque voiture a 4 roues. Combien de roues lui faut-il ?",
   answers:["7","10","12"], ok:2, hide:"Dans le placard de la cuisine, en bas"},
- {title:"Dernier verrou", text:"Je monte, je monte et je ne redescends jamais. Aujourd'hui, c'est ma fête ! Qui suis-je ?",
-  answers:["L'âge","La fusée","L'ascenseur"], ok:0, hide:"Le coffre final, dans le salon"}
+ {title:"La dernière page", text:"« Je monte, je monte et je ne redescends jamais. Aujourd'hui, c'est ma fête ! » Qui suis-je ?",
+  answers:["L'âge","La fusée","L'ascenseur"], ok:0, hide:"La grande boîte finale, dans le salon"}
 ];
+const OOPS=["Oh non, encore une catastrophe !","Patatras ! La boîte est tombée !","Oups ! Le carnet a pris l'eau !","Badaboum ! Tout s'est renversé !"];
 
-const KEY="r8-cachettes";
-function loadHides(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(Array.isArray(s))s.forEach((h,i)=>{if(STEPS[i]&&h)STEPS[i].hide=h});}catch(e){}}
-function saveHides(){try{localStorage.setItem(KEY,JSON.stringify(STEPS.map(s=>s.hide)));}catch(e){}}
+const KEY="anatole-cachettes";
+function loadHides(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(Array.isArray(s))s.forEach((h,k)=>{if(STEPS[k]&&h)STEPS[k].hide=h});}catch(e){}}
+function saveHides(){try{localStorage.setItem(KEY,JSON.stringify(STEPS.map(s=>s.hide)));return true}catch(e){return false}}
 loadHides();
 
-let i=0, actx=null;
-const panel=document.getElementById("panel");
+let i=0, actx=null, oopsN=0;
+const page=document.getElementById("page");
 const LETTERS=["A","B","C","D"];
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 
 function audio(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();}catch(e){actx=null}return actx}
-function tone(f1,f2,dur,type){const a=audio();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f1,a.currentTime);o.frequency.linearRampToValueAtTime(f2,a.currentTime+dur);g.gain.setValueAtTime(.15,a.currentTime);g.gain.linearRampToValueAtTime(0,a.currentTime+dur);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+dur)}
-function siren(){for(let k=0;k<3;k++)setTimeout(()=>tone(880,440,.3,"sawtooth"),k*330)}
-function chime(){tone(660,660,.15,"sine");setTimeout(()=>tone(990,990,.25,"sine"),150)}
+function tone(f1,f2,dur,type,vol){const a=audio();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f1,a.currentTime);o.frequency.exponentialRampToValueAtTime(f2,a.currentTime+dur);g.gain.setValueAtTime(vol||.15,a.currentTime);g.gain.linearRampToValueAtTime(0,a.currentTime+dur);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+dur)}
+function crash(){tone(400,60,.6,"sawtooth",.18);setTimeout(()=>tone(300,80,.4,"square",.1),180)}
+function yay(){tone(660,660,.12,"triangle");setTimeout(()=>tone(880,880,.12,"triangle"),120);setTimeout(()=>tone(1320,1320,.2,"triangle"),240)}
 
-function setProgress(done){const p=Math.round(done/STEPS.length*100);document.getElementById("energy").style.width=p+"%";document.getElementById("energyLabel").textContent="Énergie du robot : "+p+" %";}
+function progress(n){document.getElementById("bar").style.width=(n/STEPS.length*100)+"%";document.getElementById("barLabel").textContent=`Pièces retrouvées : ${n} sur ${STEPS.length}`;}
 
 function intro(){
-  document.getElementById("stepLabel").textContent="";
-  setProgress(0);
-  panel.innerHTML=`${ROBOT}<h1 class="screen-title">Mission : sauver R-8</h1>
-  <p class="msg">Alerte ! Le robot R-8 s'est écrasé et ses pièces sont cachées partout dans la maison. Répondez à ses questions pour recharger son énergie et trouver les cachettes.</p>
-  <p class="msg">Attention : une mauvaise réponse provoque une panne, et le robot recule d'une étape !</p>
-  <button class="big" id="go" type="button">Démarrer la mission</button>`;
-  document.getElementById("go").onclick=()=>{audio();chime();i=0;question();};
+  document.getElementById("stepLabel").textContent="";progress(0);
+  page.innerHTML=`${BOX}<h1>Au secours, la bande !</h1>
+  <p class="msg">Anatole voulait préparer une invention surprise pour l'anniversaire. Il a voulu bien faire… et patatras ! La boîte est tombée, et toutes les pièces se sont éparpillées dans la maison.</p>
+  <p class="msg">Heureusement, il a tout noté dans son carnet. Répondez à ses questions pour savoir où sont cachées les pièces.</p>
+  <p class="note">Attention : une mauvaise réponse, et c'est la catastrophe ! On recule d'une page.</p>
+  <button class="big" id="go" type="button">Ouvrir le carnet</button>`;
+  document.getElementById("go").onclick=()=>{audio();yay();i=0;question();};
 }
 
 function question(){
   const s=STEPS[i];
-  document.getElementById("stepLabel").textContent=`Étape ${i+1} / ${STEPS.length}`;
-  setProgress(i);
-  panel.innerHTML=`<h2 class="screen-title">${s.title}</h2><p class="msg">${s.text}</p>${s.extra||""}
+  document.getElementById("stepLabel").textContent=`Page ${i+1} / ${STEPS.length}`;progress(i);
+  page.innerHTML=`<h2>${s.title}</h2><p class="msg">${s.text}</p>${s.extra||""}
   <div class="answers">${s.answers.map((a,k)=>`<button class="ans" type="button" data-k="${k}"><b>${LETTERS[k]}</b><span>${a}</span></button>`).join("")}</div>`;
-  panel.querySelectorAll(".ans").forEach(b=>b.onclick=()=>answer(+b.dataset.k));
+  page.querySelectorAll(".ans").forEach(b=>b.onclick=()=>answer(+b.dataset.k));
+  page.querySelector(".ans").focus({preventScroll:true});
 }
 
 function answer(k){
-  const s=STEPS[i];
+  const s=STEPS[i], last=i===STEPS.length-1;
   if(k===s.ok){
-    chime(); setProgress(i+1);
-    const last=i===STEPS.length-1;
-    panel.innerHTML=`<p class="status ok">Bonne réponse ! Pièce localisée.</p>
-    <div class="hide-box"><small>${last?"Coffre final":"Cachette de la pièce"}</small>${s.hide}</div>
-    <button class="big" id="next" type="button">${last?"On a tout trouvé !":"Pièce trouvée, étape suivante"}</button>`;
+    yay();progress(i+1);
+    page.innerHTML=`<div class="stamp ok">Très bien !</div>
+    <div class="hide-box"><small>${last?"La grande boîte est…":"La pièce est cachée…"}</small>${esc(s.hide)}</div>
+    <button class="big" id="next" type="button">${last?"On a tout trouvé !":"Trouvée ! Page suivante"}</button>`;
     document.getElementById("next").onclick=()=>{if(last)victory();else{i++;question();}};
   }else{
-    siren(); document.body.classList.remove("alarm"); void document.body.offsetWidth; document.body.classList.add("alarm");
+    crash();document.body.classList.remove("oops");void document.body.offsetWidth;document.body.classList.add("oops");
     const back=Math.max(0,i-1), moved=back!==i;
-    panel.innerHTML=`<p class="status bad">Erreur système ! Panne d'énergie.</p>
-    <p class="msg">${moved?`R-8 recule à l'étape ${back+1}. Il faut répondre à nouveau !`:"R-8 doit recommencer cette étape."}</p>
-    <button class="big amber" id="retry" type="button">Réparer et continuer</button>`;
-    i=back; setProgress(i);
+    page.innerHTML=`<div class="stamp bad">${OOPS[oopsN++%OOPS.length]}</div>
+    <p class="msg">${moved?`La page s'est envolée ! Retour à la page ${back+1}.`:"Il faut recommencer cette page."}</p>
+    <button class="big red" id="retry" type="button">On répare et on continue</button>`;
+    i=back;progress(i);
     document.getElementById("retry").onclick=question;
   }
 }
 
 function victory(){
-  document.getElementById("stepLabel").textContent="Mission accomplie";
-  setProgress(STEPS.length);
-  panel.innerHTML=`${ROBOT}<h2 class="screen-title">R-8 est réparé !</h2>
-  <p class="msg">Bravo, équipe de secours ! Assemblez maintenant vos vaisseaux avec les pièces trouvées. Joyeux anniversaire !</p>
+  document.getElementById("stepLabel").textContent="Mission réussie";progress(STEPS.length);
+  page.innerHTML=`${STAR}<h2>Catastrophe réparée !</h2>
+  <p class="msg">Grâce à vous, Anatole a toutes ses pièces. Maintenant, à vous de construire l'invention ! Joyeux anniversaire !</p>
   <button class="big" id="again" type="button">Recommencer</button>`;
-  [0,200,400].forEach((t,n)=>setTimeout(()=>tone(523*(1+n*.25),523*(1+n*.25),.3,"sine"),t));
+  [0,160,320,480].forEach((t,n)=>setTimeout(()=>tone(523*Math.pow(1.26,n),523*Math.pow(1.26,n),.25,"triangle"),t));
   document.getElementById("again").onclick=intro;
 }
 
 function parent(){
   document.getElementById("stepLabel").textContent="Mode parent";
-  panel.innerHTML=`<h2 class="screen-title">Cachettes</h2>
-  <p class="note">Écrivez où vous cachez chaque pièce. C'est enregistré sur cet appareil uniquement.</p>
-  <div class="parent" style="display:flex;flex-direction:column;gap:12px">${STEPS.map((s,k)=>`<div><label for="h${k}">Étape ${k+1} · ${s.title}</label><input id="h${k}" value="${s.hide.replace(/"/g,"&quot;")}"></div>`).join("")}</div>
-  <div class="row"><button class="big" id="save" type="button">Enregistrer</button><button class="big amber" id="back" type="button">Retour</button></div>
-  <p class="note" id="saved"></p>`;
-  document.getElementById("save").onclick=()=>{STEPS.forEach((s,k)=>{const v=document.getElementById("h"+k).value.trim();if(v)s.hide=v});saveHides();document.getElementById("saved").textContent="Enregistré.";};
+  page.innerHTML=`<h2>Les cachettes</h2>
+  <p class="small">Écrivez où vous cachez chaque pièce. C'est enregistré sur cet appareil uniquement.</p>
+  <div class="parent">${STEPS.map((s,k)=>`<div><label for="h${k}">Page ${k+1} · ${s.title}</label><input id="h${k}" value="${esc(s.hide)}"></div>`).join("")}</div>
+  <div class="row"><button class="big" id="save" type="button">Enregistrer</button><button class="big red" id="back" type="button">Retour</button></div>
+  <p class="small" id="saved"></p>`;
+  document.getElementById("save").onclick=()=>{STEPS.forEach((s,k)=>{const v=document.getElementById("h"+k).value.trim();if(v)s.hide=v});document.getElementById("saved").textContent=saveHides()?"Enregistré.":"Gardé pour cette séance (l'appareil ne permet pas l'enregistrement).";};
   document.getElementById("back").onclick=intro;
 }
 document.getElementById("parentBtn").onclick=parent;
