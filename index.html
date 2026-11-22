@@ -98,6 +98,12 @@ const STEPS=[
  {title:"La devinette du jardin", text:"Anatole a trouvé une petite bête dans la cour de l'école : « Je porte ma maison sur mon dos et je laisse une trace qui brille. » Qui est-ce ?",
   answers:["La tortue","Le hérisson","L'escargot"], ok:2, hide:"Dans le panier à chaussures de l'entrée",
   hint:"Elle est très lente, elle a des antennes et elle sort quand il pleut."},
+ {title:"La suite mystère", text:"Anatole a trouvé cette suite de lettres sur le tableau de la classe. Quelle lettre vient ensuite ?",
+  extra:`<div class="code">J F M A M J ?</div>`, answers:["K","J","A"], ok:1, hide:"Derrière les livres de l'étagère",
+  hint:"Ce ne sont pas des lettres au hasard : ce sont les premières lettres de mots que l'on dit 12 fois par an… Janvier, Février…"},
+ {title:"Encore des lettres !", text:"Sur la page suivante, une autre suite. Quelle lettre manque ?",
+  extra:`<div class="code">L M M J V S ?</div>`, answers:["T","S","D"], ok:2, hide:"Dans la boîte à jouets de la chambre",
+  hint:"Pensez à l'école : on y va le Lundi, le Mardi… C'est la semaine !"},
  {title:"Les chiffres à l'envers", text:"Anatole a écrit chaque chiffre deux fois : une fois à l'endroit, une fois dans le miroir. Quel dessin vient ensuite ?",
   extra:`<div class="mirror">${pair(1)}${pair(2)}${pair(3)}${pair(4)}${pair('?',true)}</div>`,
   answers:[pair(6),pair(5),pair(8)], ok:1, html:true, hide:"Sous la nappe de la table",
@@ -126,7 +132,7 @@ const BONUS=[
 let bonusN=0, usedHint=false;
 const OOPS=["Oh non, encore une catastrophe !","Patatras ! La boîte est tombée !","Oups ! Le carnet a pris l'eau !","Badaboum ! Tout s'est renversé !"];
 
-const KEY="anatole-cachettes-v2";
+const KEY="anatole-cachettes-v3";
 function loadHides(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(Array.isArray(s))s.forEach((h,k)=>{if(STEPS[k]&&h)STEPS[k].hide=h});}catch(e){}}
 function saveHides(){try{localStorage.setItem(KEY,JSON.stringify(STEPS.map(s=>s.hide)));return true}catch(e){return false}}
 loadHides();
