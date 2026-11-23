@@ -66,6 +66,28 @@ button{font:inherit;cursor:pointer}
 .parent input{width:100%;box-sizing:border-box;background:#fff;color:var(--pencil);border:1px solid var(--seyes-strong);border-radius:6px;padding:9px;font:inherit;font-size:17px}
 .row{display:flex;gap:10px;flex-wrap:wrap}
 .small{font-size:15px;margin:0}
+.mission-tag{align-self:flex-start;font-family:var(--hand);font-size:20px;color:var(--paper);background:var(--green);padding:2px 12px;border-radius:8px;transform:rotate(-2deg)}
+.story{font-family:var(--hand);font-size:23px;line-height:1.3;color:var(--ink);margin:0;transform:rotate(-.6deg)}
+.todo{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+.check{font-size:16px;margin:0}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:6px}
+.role{background:#ffffffb3;border:1.5px solid var(--seyes-strong);border-radius:10px;padding:6px 10px;font-size:15px;line-height:1.3;min-width:0}
+.role b{font-family:var(--hand);font-weight:400;font-size:19px;color:var(--red)}
+.roles-mini{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;border-top:1px dashed var(--seyes-strong);padding-top:8px}
+.roles-mini b{color:var(--ink)}
+.timer{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.clock{font-family:var(--hand);font-size:46px;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums;min-width:3.2ch}
+.clock.end{color:var(--green)}
+.big.green{background:var(--green);box-shadow:3px 3px 0 #105a30}
+.big.soft{background:#fff4c4;color:var(--ink);box-shadow:3px 3px 0 var(--seyes-strong);font-size:21px}
+.big:disabled{opacity:.5;cursor:default}
+.stamp.mission{align-self:center;font-size:clamp(30px,8vw,42px);color:var(--green);border:5px double var(--green);transform:rotate(-7deg);padding:6px 18px;text-align:center}
+.pinbox input{max-width:9ch;font-size:28px;letter-spacing:.35em;text-align:center}
+.err{color:var(--red);font-size:16px;margin:0;min-height:1em}
+.sub{font-family:var(--hand);font-weight:400;font-size:24px;color:var(--ink);margin:6px 0 0}
+.gifts{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.gifts li{background:#fff4c4;padding:10px 14px;font-size:21px;border-radius:2px;transform:rotate(var(--r,0deg));box-shadow:0 3px 8px #6b5a3330}
+.page a{color:var(--ink)}
 @media (max-width:420px){.page{padding-left:52px}.page{background-image:linear-gradient(90deg,transparent 38px,var(--margin) 38px 40px,transparent 40px),repeating-linear-gradient(0deg,transparent 0 31px,var(--seyes-strong) 31px 32px),repeating-linear-gradient(0deg,transparent 0 7px,var(--seyes) 7px 8px)}.page::after{left:10px}}
 @media (prefers-reduced-motion:reduce){body.oops .page{animation:none}.ruler i{transition:none}}
 </style>
@@ -76,7 +98,7 @@ button{font:inherit;cursor:pointer}
     <div class="step" id="stepLabel"></div>
   </header>
   <div class="ruler" aria-hidden="true"><i id="bar"></i></div>
-  <div class="ruler-label" id="barLabel">Pièces retrouvées : 0 sur 8</div>
+  <div class="ruler-label" id="barLabel">Pièces : 0 / 8 · Missions : 0 / 3</div>
   <main class="page" id="page" aria-live="polite"></main>
   <button class="link" id="parentBtn" type="button">Mode parent</button>
 </div>
@@ -137,107 +159,262 @@ function loadHides(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");i
 function saveHides(){try{localStorage.setItem(KEY,JSON.stringify(STEPS.map(s=>s.hide)));return true}catch(e){return false}}
 loadHides();
 
-let i=0, actx=null, oopsN=0;
+/* Missions de construction LEGO (briques en vrac fournies par l'adulte). */
+const MISSIONS=[
+ {title:"Construire un véhicule", story:"Anatole a besoin d'un véhicule pour transporter les pièces de son invention. Mais son véhicule est complètement cassé !",
+  todo:["Prenez les briques LEGO que l'adulte vous donne.","Construisez ensemble un petit véhicule capable de transporter une pièce.","Gardez-le bien : il servira pour une autre mission !"],
+  check:"L'adulte vérifie que le véhicule tient et qu'il peut transporter une pièce."},
+ {title:"Le robot assistant", story:"Le robot assistant d'Anatole a perdu sa forme. Aidez-le à retrouver son apparence !",
+  todo:["Construisez un petit robot avec une tête, un corps et des bras.","Chaque membre de la bande ajoute au moins une pièce.","Donnez un nom à votre robot !"],
+  check:"L'adulte vérifie que chacun a ajouté au moins une pièce."},
+ {title:"Le pont de secours", story:"Pour transporter les dernières pièces, Anatole doit traverser une rivière. Construisez un pont solide !",
+  todo:["Faites deux petites tours de briques : ce sont les deux rives. Écartez-les d'une main.","Construisez ensemble un pont entre les deux rives.","Le test : faites passer le véhicule de la mission 1 sur le pont sans qu'il tombe !"],
+  check:"L'adulte vérifie que le véhicule passe sur le pont et que tout le monde a participé."}
+];
+/* Parcours : r = énigme (index dans STEPS), m = mission (index dans MISSIONS). */
+const ROUTE=[{r:0},{r:1},{m:0},{r:2},{r:3},{r:4},{r:5},{m:1},{r:6},{m:2},{r:7}];
+const ROLES=[
+ {name:"Le Décodeur", job:"lit la question ou la mission à voix haute"},
+ {name:"Le Constructeur", job:"garde les pièces trouvées et dirige la construction"},
+ {name:"L'Explorateur", job:"part chercher la cachette ou les briques"},
+ {name:"Le Vérificateur", job:"vérifie que toute la bande est d'accord"}
+];
+
+const K_PROG="anatole-progression-v1", K_NAMES="anatole-noms-v1", K_PIN="anatole-code-v1";
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
+let names=lsGet(K_NAMES,null); if(!Array.isArray(names)||names.length!==4)names=["","","",""];
+let pin=String(lsGet(K_PIN,"")||"");
+
+let pos=0, phase="q", started=false, actx=null, oopsN=0, tLeft=180, tId=null;
+(function loadProgress(){const p=lsGet(K_PROG,null);if(p&&p.started){pos=Math.min(Math.max(0,p.pos|0),ROUTE.length);phase=p.phase||"q";usedHint=!!p.usedHint;bonusN=p.bonusN|0;oopsN=p.oopsN|0;started=true;}})();
+function save(){lsSet(K_PROG,{pos,phase,usedHint,bonusN,oopsN,started:true});}
+function resetProgress(){pos=0;phase="q";usedHint=false;started=false;lsDel(K_PROG);}
+
 const page=document.getElementById("page");
 const LETTERS=["A","B","C","D"];
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+const nameOf=j=>esc((names[j]||"").trim()||`Joueur ${j+1}`);
+function stopTimer(){if(tId){clearInterval(tId);tId=null;}}
+function show(html){stopTimer();page.innerHTML=html;}
+function shake(){document.body.classList.remove("oops");void document.body.offsetWidth;document.body.classList.add("oops");}
 
 function audio(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();}catch(e){actx=null}return actx}
 function tone(f1,f2,dur,type,vol){const a=audio();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f1,a.currentTime);o.frequency.exponentialRampToValueAtTime(f2,a.currentTime+dur);g.gain.setValueAtTime(vol||.15,a.currentTime);g.gain.linearRampToValueAtTime(0,a.currentTime+dur);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+dur)}
 function crash(){tone(400,60,.6,"sawtooth",.18);setTimeout(()=>tone(300,80,.4,"square",.1),180)}
 function yay(){tone(660,660,.12,"triangle");setTimeout(()=>tone(880,880,.12,"triangle"),120);setTimeout(()=>tone(1320,1320,.2,"triangle"),240)}
+function fanfare(){[0,160,320,480].forEach((t,n)=>setTimeout(()=>tone(523*Math.pow(1.26,n),523*Math.pow(1.26,n),.25,"triangle"),t));}
 
-function progress(n){document.getElementById("bar").style.width=(n/STEPS.length*100)+"%";document.getElementById("barLabel").textContent=`Pièces retrouvées : ${n} sur ${STEPS.length}`;}
+/* Rôles : ils tournent d'un cran après chaque mission réussie. */
+function rot(){return ROUTE.slice(0,pos).filter(x=>x.m!=null).length;}
+function childFor(r){return ((r-rot())%4+4)%4;}
+function rolesFull(){return `<div class="roles">${ROLES.map((R,r)=>`<div class="role"><b>${R.name}</b> : ${nameOf(childFor(r))}<br>${R.job}</div>`).join("")}</div>`;}
+function rolesMini(){return `<div class="roles-mini">${ROLES.map((R,r)=>`<span>${R.name.replace(/^(Le |L')/,"")} : <b>${nameOf(childFor(r))}</b></span>`).join("")}</div>`;}
+
+function progress(){
+  let done=pos+((phase==="reveal"||phase==="victory"||phase==="surprise")&&pos<ROUTE.length?1:0); if(done>ROUTE.length)done=ROUTE.length;
+  const seen=ROUTE.slice(0,done), r=seen.filter(x=>x.r!=null).length, m=seen.filter(x=>x.m!=null).length;
+  document.getElementById("bar").style.width=(done/ROUTE.length*100)+"%";
+  document.getElementById("barLabel").textContent=`Pièces : ${r} / ${STEPS.length} · Missions : ${m} / ${MISSIONS.length}`;
+  document.getElementById("stepLabel").textContent=started&&pos<ROUTE.length?`Étape ${pos+1} / ${ROUTE.length}`:"";
+}
 
 function intro(){
-  document.getElementById("stepLabel").textContent="";progress(0);
-  page.innerHTML=`${BOX}<h1>Au secours, la bande !</h1>
-  <p class="msg">Anatole voulait préparer une invention surprise pour l'anniversaire. Il a voulu bien faire… et patatras ! La boîte est tombée, et toutes les pièces se sont éparpillées dans la maison.</p>
-  <p class="msg">Heureusement, il a tout noté dans son carnet. Répondez à ses questions pour savoir où sont cachées les pièces.</p>
+  phase=started?phase:"q";progress();document.getElementById("stepLabel").textContent="";
+  const resumeBtn=started?`<button class="big green" id="resume" type="button">Reprendre la mission (étape ${Math.min(pos+1,ROUTE.length)})</button><button class="big red" id="restart" type="button">Recommencer depuis le début</button>`:`<button class="big" id="go" type="button">Ouvrir le carnet</button>`;
+  show(`${BOX}<h1>Au secours, la bande !</h1>
+  <p class="msg">Anatole préparait une invention secrète pour l'anniversaire : le Projet X. Il a voulu bien faire… et patatras ! La boîte est tombée, et toutes les pièces se sont éparpillées dans la maison.</p>
+  <p class="msg">Heureusement, il a tout noté dans son carnet. Répondez à ses questions pour trouver les pièces, et réussissez ses missions de construction.</p>
   <p class="note">Attention : une mauvaise réponse, et c'est la catastrophe ! On recule d'une page.</p>
-  <button class="big" id="go" type="button">Ouvrir le carnet</button>`;
-  document.getElementById("go").onclick=()=>{audio();yay();i=0;usedHint=false;question();};
+  <div class="row">${resumeBtn}</div>`);
+  const go=document.getElementById("go"), rs=document.getElementById("resume"), rr=document.getElementById("restart");
+  if(go)go.onclick=()=>{audio();if(!pin)setup(start);else start();};
+  if(rs)rs.onclick=()=>{audio();resume();};
+  if(rr)rr.onclick=()=>{rr.textContent="Sûr ? Appuyez encore pour tout recommencer";rr.onclick=()=>{resetProgress();intro();};};
+}
+function start(){yay();pos=0;phase="q";usedHint=false;started=true;save();go();}
+function resume(){
+  if(!started)return intro();
+  switch(phase){case "bonus":return bonus();case "reveal":return reveal();case "mdone":return missionDone();case "victory":return victory();case "surprise":return surprise();default:return go();}
+}
+function go(){if(pos>=ROUTE.length)return victory();if(ROUTE[pos].m!=null)mission();else question();}
+
+/* Préparation par l'adulte : code secret + prénoms. */
+function setup(next){
+  document.getElementById("stepLabel").textContent="Pour les adultes";
+  show(`<h2>Préparation</h2>
+  <p class="msg">Avant de commencer, un adulte choisit un code secret à 4 chiffres. Il sert à valider les missions de construction et à ouvrir le Mode parent.</p>
+  <div class="parent pinbox"><div><label for="p1">Code secret</label><input id="p1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"></div>
+  <div><label for="p2">Encore une fois</label><input id="p2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"></div></div>
+  <p class="msg">Les prénoms de la bande, pour les rôles (facultatif) :</p>
+  <div class="parent">${[0,1,2,3].map(j=>`<div><label for="n${j}">Enfant ${j+1}</label><input id="n${j}" value="${esc(names[j])}" autocomplete="off"></div>`).join("")}</div>
+  <p class="err" id="err"></p>
+  <div class="row"><button class="big" id="ok" type="button">C'est parti !</button><button class="big red" id="back" type="button">Retour</button></div>`);
+  document.getElementById("ok").onclick=()=>{
+    const a=document.getElementById("p1").value.trim(), b=document.getElementById("p2").value.trim();
+    if(!/^\d{4}$/.test(a)){document.getElementById("err").textContent="Le code doit avoir 4 chiffres.";return;}
+    if(a!==b){document.getElementById("err").textContent="Les deux codes ne sont pas pareils.";return;}
+    pin=a;lsSet(K_PIN,pin);names=[0,1,2,3].map(j=>document.getElementById("n"+j).value.trim());lsSet(K_NAMES,names);next();
+  };
+  document.getElementById("back").onclick=intro;
+}
+
+/* Vérification par l'adulte avec le code secret. */
+function pinCheck(title,msg,onOk,onCancel){
+  show(`<h2>${title}</h2><p class="msg">${msg}</p>
+  <div class="parent pinbox"><div><label for="pc">Code secret de l'adulte</label><input id="pc" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"></div></div>
+  <p class="err" id="err"></p>
+  <div class="row"><button class="big green" id="ok" type="button">Valider</button><button class="big red" id="no" type="button">Retour</button></div>`);
+  const inp=document.getElementById("pc");inp.focus({preventScroll:true});
+  const tryIt=()=>{if(inp.value.trim()===pin)onOk();else{inp.value="";document.getElementById("err").textContent="Code incorrect. Demandez à un adulte !";}};
+  document.getElementById("ok").onclick=tryIt;
+  inp.onkeydown=e=>{if(e.key==="Enter")tryIt();};
+  document.getElementById("no").onclick=onCancel;
 }
 
 function question(){
-  const s=STEPS[i];
-  document.getElementById("stepLabel").textContent=`Page ${i+1} / ${STEPS.length}`;progress(i);
-  page.innerHTML=`<h2>${s.title}</h2><p class="msg">${s.text}</p>${s.extra||""}
+  phase="q";save();progress();
+  const s=STEPS[ROUTE[pos].r];
+  show(`<h2>${s.title}</h2><p class="msg">${s.text}</p>${s.extra||""}
   <div class="answers">${s.answers.map((a,k)=>`<button class="ans" type="button" data-k="${k}"><b>${LETTERS[k]}</b><span>${a}</span></button>`).join("")}</div>
-  <div class="hint" id="hintZone">${usedHint?`<div class="hint-text"><small>Indice</small>${s.hint}</div>`:`<button class="hint-btn" id="hintBtn" type="button">Besoin d'un indice ?</button><p class="small">Un indice coûte une question bonus.</p>`}</div>`;
+  <div class="hint" id="hintZone">${usedHint?`<div class="hint-text"><small>Indice</small>${s.hint}</div>`:`<button class="hint-btn" id="hintBtn" type="button">Besoin d'un indice ?</button><p class="small">Un indice coûte une question bonus.</p>`}</div>
+  ${rolesMini()}`);
   page.querySelectorAll(".ans").forEach(b=>b.onclick=()=>answer(+b.dataset.k));
   const hb=document.getElementById("hintBtn");
-  if(hb)hb.onclick=()=>{usedHint=true;document.getElementById("hintZone").innerHTML=`<div class="hint-text"><small>Indice</small>${s.hint}</div><p class="small">Après la bonne réponse, il faudra répondre à une question bonus.</p>`;};
+  if(hb)hb.onclick=()=>{usedHint=true;save();document.getElementById("hintZone").innerHTML=`<div class="hint-text"><small>Indice</small>${s.hint}</div><p class="small">Après la bonne réponse, il faudra répondre à une question bonus.</p>`;};
   page.querySelector(".ans").focus({preventScroll:true});
 }
 
 function bonus(){
+  phase="bonus";save();progress();
   const b=BONUS[bonusN%BONUS.length];
-  page.innerHTML=`<div class="stamp ok">Juste !</div><h2>Question bonus</h2>
+  show(`<div class="stamp ok">Juste !</div><h2>Question bonus</h2>
   <p class="msg">Vous avez pris un indice : répondez à cette question pour gagner la pièce.</p>
   <p class="msg">${b.text}</p>
-  <div class="answers">${b.answers.map((a,k)=>`<button class="ans" type="button" data-k="${k}"><b>${LETTERS[k]}</b><span>${a}</span></button>`).join("")}</div>`;
+  <div class="answers">${b.answers.map((a,k)=>`<button class="ans" type="button" data-k="${k}"><b>${LETTERS[k]}</b><span>${a}</span></button>`).join("")}</div>`);
   page.querySelectorAll(".ans").forEach(el=>el.onclick=()=>{
     bonusN++;
-    if(+el.dataset.k===b.ok){usedHint=false;reveal();}
-    else{crash();document.body.classList.remove("oops");void document.body.offsetWidth;document.body.classList.add("oops");
-      page.innerHTML=`<div class="stamp bad">${OOPS[oopsN++%OOPS.length]}</div><p class="msg">Mauvaise réponse à la question bonus. Voici une autre question !</p>
-      <button class="big red" id="retry" type="button">Nouvelle question bonus</button>`;
+    if(+el.dataset.k===b.ok){yay();usedHint=false;reveal();}
+    else{crash();shake();save();
+      show(`<div class="stamp bad">${OOPS[oopsN++%OOPS.length]}</div><p class="msg">Mauvaise réponse à la question bonus. Voici une autre question !</p>
+      <button class="big red" id="retry" type="button">Nouvelle question bonus</button>`);
       document.getElementById("retry").onclick=bonus;}
   });
   page.querySelector(".ans").focus({preventScroll:true});
 }
 
 function answer(k){
-  const s=STEPS[i];
-  if(k===s.ok){
-    yay();
-    if(usedHint)bonus();else reveal();
-  }else wrong();
+  const s=STEPS[ROUTE[pos].r];
+  if(k===s.ok){yay();if(usedHint)bonus();else reveal();}
+  else wrong();
 }
 
 function reveal(){
-  const s=STEPS[i], last=i===STEPS.length-1;
-  {
-    progress(i+1);
-    page.innerHTML=`<div class="stamp ok">Très bien !</div>
-    <div class="hide-box"><small>${last?"La grande boîte est…":"La pièce est cachée…"}</small>${esc(s.hide)}</div>
-    <button class="big" id="next" type="button">${last?"On a tout trouvé !":"Trouvée ! Page suivante"}</button>`;
-    document.getElementById("next").onclick=()=>{if(last)victory();else{i++;usedHint=false;question();}};
-  }
+  phase="reveal";save();progress();
+  const s=STEPS[ROUTE[pos].r], last=pos===ROUTE.length-1;
+  show(`<div class="stamp ok">Très bien !</div>
+  <div class="hide-box"><small>${last?"La grande boîte est…":"La pièce est cachée…"}</small>${esc(s.hide)}</div>
+  <p class="small">${nameOf(childFor(2))}, l'Explorateur, mène la bande à la cachette !</p>
+  <button class="big" id="next" type="button">${last?"On a tout trouvé !":"Trouvée ! Page suivante"}</button>`);
+  document.getElementById("next").onclick=()=>{pos++;usedHint=false;phase="q";save();go();};
 }
 
 function wrong(){
-  {
-    crash();document.body.classList.remove("oops");void document.body.offsetWidth;document.body.classList.add("oops");
-    const back=Math.max(0,i-1), moved=back!==i;
-    page.innerHTML=`<div class="stamp bad">${OOPS[oopsN++%OOPS.length]}</div>
-    <p class="msg">${moved?`La page s'est envolée ! Retour à la page ${back+1}.`:"Il faut recommencer cette page."}</p>
-    <button class="big red" id="retry" type="button">On répare et on continue</button>`;
-    i=back;progress(i);if(moved)usedHint=false;
-    document.getElementById("retry").onclick=question;
-  }
+  crash();shake();
+  const prevIsRiddle=pos>0&&ROUTE[pos-1].r!=null, back=prevIsRiddle?pos-1:pos, moved=back!==pos;
+  const msg=moved?"La page s'est envolée ! Retour à la page précédente.":(pos>0&&ROUTE[pos-1].m!=null?"Heureusement, votre construction est sauvée ! Il faut juste recommencer cette page.":"Il faut recommencer cette page.");
+  pos=back;if(moved)usedHint=false;phase="q";save();progress();
+  show(`<div class="stamp bad">${OOPS[oopsN++%OOPS.length]}</div>
+  <p class="msg">${msg}</p>
+  <button class="big red" id="retry" type="button">On répare et on continue</button>`);
+  document.getElementById("retry").onclick=go;
+}
+
+/* Écran de mission : histoire, consignes, rôles, chrono facultatif, validation par l'adulte. */
+function fmt(s){const m=Math.floor(s/60),r=s%60;return m+":"+String(r).padStart(2,"0");}
+function mission(){
+  phase="mission";save();progress();
+  const k=ROUTE[pos].m, M=MISSIONS[k];
+  show(`<div class="mission-tag">Mission de construction ${k+1} / ${MISSIONS.length}</div>
+  <h2>${M.title}</h2>
+  <p class="story">« ${M.story} »</p>
+  <ol class="todo">${M.todo.map(t=>`<li>${t}</li>`).join("")}</ol>
+  ${rolesFull()}
+  <div class="timer"><span class="clock" id="clock">3:00</span><button class="big soft" id="tStart" type="button">Lancer le chrono</button></div>
+  <p class="small" id="tMsg">Le chrono est juste là pour encourager. Personne ne perd !</p>
+  <div class="row"><button class="big green" id="done" type="button">Mission accomplie !</button><button class="big soft" id="more" type="button">Besoin d'un peu plus de temps ?</button></div>
+  <p class="check">${M.check}</p>`);
+  tLeft=180;
+  const clock=document.getElementById("clock"), msg=document.getElementById("tMsg");
+  const tick=()=>{tLeft--;clock.textContent=fmt(Math.max(0,tLeft));if(tLeft<=0){stopTimer();clock.classList.add("end");tone(523,392,.5,"sine",.12);msg.textContent="Le temps est écoulé, mais pas de panique ! Finissez tranquillement.";}};
+  const run=()=>{if(!tId&&tLeft>0)tId=setInterval(tick,1000);};
+  document.getElementById("tStart").onclick=e=>{audio();e.target.disabled=true;run();};
+  document.getElementById("more").onclick=()=>{tLeft=Math.max(0,tLeft)+60;clock.textContent=fmt(tLeft);clock.classList.remove("end");msg.textContent="Une minute de plus ! Prenez votre temps.";if(document.getElementById("tStart").disabled)run();};
+  document.getElementById("done").onclick=()=>pinCheck(`Mission ${k+1} : vérification`,`${M.check} Si c'est bon, l'adulte tape son code.`,()=>{pos++;phase="mdone";save();missionDone();},mission);
+}
+function missionDone(){
+  phase="mdone";save();progress();fanfare();
+  const k=ROUTE[pos-1].m;
+  show(`<div class="stamp mission">MISSION RÉUSSIE !</div>
+  <p class="msg">Bravo, la bande ! Mission ${k+1} terminée. Anatole est très fier de vous.</p>
+  ${k<MISSIONS.length-1?`<p class="note">On change les rôles !</p>${rolesFull()}`:`<p class="note">Il reste une dernière page du carnet…</p>`}
+  <button class="big" id="next" type="button">Page suivante</button>`);
+  document.getElementById("next").onclick=()=>{phase="q";save();go();};
 }
 
 function victory(){
-  document.getElementById("stepLabel").textContent="Mission réussie";progress(STEPS.length);
-  page.innerHTML=`${STAR}<h2>Catastrophe réparée !</h2>
-  <p class="msg">Grâce à vous, Anatole a toutes ses pièces. Maintenant, à vous de construire l'invention ! Joyeux anniversaire !</p>
-  <button class="big" id="again" type="button">Recommencer</button>`;
-  [0,160,320,480].forEach((t,n)=>setTimeout(()=>tone(523*Math.pow(1.26,n),523*Math.pow(1.26,n),.25,"triangle"),t));
-  document.getElementById("again").onclick=intro;
+  pos=ROUTE.length;phase="victory";save();progress();document.getElementById("stepLabel").textContent="Projet X réparé";fanfare();
+  show(`${STAR}<h1>BRAVO, LA BANDE ! VOUS AVEZ RÉPARÉ LE PROJET X !</h1>
+  <p class="msg">Grâce à vous, Anatole a retrouvé toutes ses pièces, et vos constructions ont sauvé son invention.</p>
+  <button class="big green" id="gift" type="button">Découvrir la surprise</button>`);
+  document.getElementById("gift").onclick=surprise;
+}
+function surprise(){
+  phase="surprise";save();progress();document.getElementById("stepLabel").textContent="Surprise !";yay();
+  show(`${BOX}<h2>La surprise d'Anatole</h2>
+  <p class="msg">Ouvrez la grande boîte : chacun y trouve son propre set LEGO, à emporter à la maison !</p>
+  <ul class="gifts">${[0,1,2,3].map(j=>`<li style="--r:${[-1,1,-.5,.8][j]}deg">Un set LEGO pour ${nameOf(j)}</li>`).join("")}</ul>
+  <p class="note">Joyeux anniversaire !</p>
+  <button class="big red" id="again" type="button">Recommencer la quête</button>`);
+  document.getElementById("again").onclick=()=>{const b=document.getElementById("again");b.textContent="Sûr ? Appuyez encore pour tout recommencer";b.onclick=()=>{resetProgress();intro();};};
 }
 
+/* Mode parent, protégé par le code secret. */
 function parent(){
-  document.getElementById("stepLabel").textContent="Mode parent";
-  page.innerHTML=`<h2>Les cachettes</h2>
-  <p class="small">Écrivez où vous cachez chaque pièce. C'est enregistré sur cet appareil uniquement.</p>
-  <div class="parent">${STEPS.map((s,k)=>`<div><label for="h${k}">Page ${k+1} · ${s.title}</label><input id="h${k}" value="${esc(s.hide)}"></div>`).join("")}</div>
-  <div class="row"><button class="big" id="save" type="button">Enregistrer</button><button class="big red" id="back" type="button">Retour</button></div>
+  if(!pin)return parentPanel();
+  pinCheck("Mode parent","Réservé aux adultes : tapez le code secret.",parentPanel,()=>resume());
+}
+function parentPanel(){
+  stopTimer();document.getElementById("stepLabel").textContent="Mode parent";
+  show(`<h2>Mode parent</h2>
+  <p class="small">Tout est enregistré sur cet appareil uniquement.</p>
+  <h3 class="sub">La bande</h3>
+  <div class="parent">${[0,1,2,3].map(j=>`<div><label for="n${j}">Enfant ${j+1}</label><input id="n${j}" value="${esc(names[j])}" autocomplete="off"></div>`).join("")}</div>
+  <h3 class="sub">Les cachettes</h3>
+  <div class="parent">${STEPS.map((s,k)=>`<div><label for="h${k}">Énigme ${k+1} · ${s.title}</label><input id="h${k}" value="${esc(s.hide)}"></div>`).join("")}</div>
+  <h3 class="sub">Code secret</h3>
+  <div class="parent pinbox"><div><label for="np">${pin?"Nouveau code (laisser vide pour garder l'actuel)":"Choisir un code à 4 chiffres"}</label><input id="np" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"></div></div>
+  <p class="err" id="err"></p>
+  <div class="row"><button class="big" id="save" type="button">Enregistrer</button><button class="big soft" id="back" type="button">Retour au jeu</button></div>
   <p class="small" id="saved"></p>
-  <p class="small"><a href="https://github.com/nsviattsau/quete-r8#readme" target="_blank" rel="noopener">Plan de la fête et réponses (GitHub)</a></p>`;
-  document.getElementById("save").onclick=()=>{STEPS.forEach((s,k)=>{const v=document.getElementById("h"+k).value.trim();if(v)s.hide=v});document.getElementById("saved").textContent=saveHides()?"Enregistré.":"Gardé pour cette séance (l'appareil ne permet pas l'enregistrement).";};
-  document.getElementById("back").onclick=intro;
+  <h3 class="sub">Progression</h3>
+  <p class="small">${started?`La quête est à l'étape ${Math.min(pos+1,ROUTE.length)} sur ${ROUTE.length}.`:"La quête n'a pas encore commencé."}</p>
+  <div class="row"><button class="big red" id="reset" type="button">Remettre la quête à zéro</button></div>
+  <p class="small"><a href="https://github.com/nsviattsau/quete-r8#readme" target="_blank" rel="noopener">Plan de la fête et réponses (GitHub)</a></p>`);
+  document.getElementById("save").onclick=()=>{
+    const np=document.getElementById("np").value.trim();
+    if(np&&!/^\d{4}$/.test(np)){document.getElementById("err").textContent="Le code doit avoir 4 chiffres.";return;}
+    document.getElementById("err").textContent="";
+    if(np){pin=np;lsSet(K_PIN,pin);document.getElementById("np").value="";}
+    names=[0,1,2,3].map(j=>document.getElementById("n"+j).value.trim());
+    STEPS.forEach((s,k)=>{const v=document.getElementById("h"+k).value.trim();if(v)s.hide=v});
+    const ok=saveHides()&&lsSet(K_NAMES,names);
+    document.getElementById("saved").textContent=ok?"Enregistré.":"Gardé pour cette séance (l'appareil ne permet pas l'enregistrement).";
+  };
+  document.getElementById("back").onclick=()=>resume();
+  const rb=document.getElementById("reset");
+  rb.onclick=()=>{rb.textContent="Sûr ? Appuyez encore pour remettre à zéro";rb.onclick=()=>{resetProgress();intro();};};
 }
 document.getElementById("parentBtn").onclick=parent;
 intro();

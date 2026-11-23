@@ -7,7 +7,11 @@ Quête d'anniversaire interactive pour enfants (6–8 ans), dans l'esprit des av
 - Bonne réponse : tampon « Très bien ! » et la cachette de la pièce s'affiche.
 - Indice : chaque page propose un indice, mais celui qui le prend doit ensuite répondre à une question bonus.
 - Mauvaise réponse : « Oh non, encore une catastrophe ! », et on recule d'une page.
-- **Mode parent** (bouton en bas) : saisir ses propres cachettes, enregistrées sur l'appareil.
+- **Missions de construction LEGO** (3) entre les énigmes : véhicule, robot assistant, pont de secours. Chrono de 3 minutes facultatif, jamais de pénalité. Un adulte valide chaque mission avec son code secret.
+- **Rôles** : Décodeur, Constructeur, Explorateur, Vérificateur. Ils tournent après chaque mission. Pas de points ni de classement.
+- **Progression sauvegardée** : après un rafraîchissement, « Reprendre la mission ».
+- **Mode parent** (bouton en bas, protégé par le code) : prénoms, cachettes, code secret, remise à zéro. Tout est enregistré sur l'appareil.
+- Code oublié : effacer les données du site dans le navigateur (cela efface aussi les cachettes et la progression).
 
 Une seule page HTML, sans dépendance. Ouvrir `index.html` dans un navigateur ou via GitHub Pages.
 
@@ -37,20 +41,27 @@ Projet familial non officiel, sans lien avec les auteurs ou l'éditeur d'Anatole
 - [ ] УФ-ручки с фонариком, около 5–7 €
 - [ ] Кодовый замок на коробку, около 5–7 €
 
-## Вопросы на сайте
+## Маршрут на сайте
 
-Ответы для родителей. Тайники вписываются в «Mode parent» на сайте.
+Ответы для родителей. Тайники, имена детей и код вписываются в «Mode parent». При первом запуске сайт сам попросит взрослого придумать 4-значный код.
 
-| Стр. | Задание | Ответ | Подсказка (стоит бонусный вопрос) |
+| Шаг | Задание | Ответ | Подсказка (стоит бонусный вопрос) |
 |---|---|---|---|
-| 1 | Шифр A=1: 12 · 21 · 14 · 5 | LUNE | Первая буква L |
-| 2 | Загадка: дом на спине, блестящий след | L'escargot | Медленная, с рожками, выходит в дождь |
-| 3 | J F M A M J ? | J (juillet) | Буквы слов, которые бывают 12 раз в год |
-| 4 | L M M J V S ? | D (dimanche) | Подумать про школьную неделю |
-| 5 | Отзеркаленные цифры 1, 2, 3, 4, ? | 5 | Закрыть правую половину рукой |
-| 6 | Загадка: зубы, но не кусается | L'engrenage | Есть в часах и велосипедах |
-| 7 | 3 машинки по 4 колеса | 12 | 4 + 4 + 4 |
-| 8 | Je monte et ne redescends jamais | L'âge | Считается в годах |
+| 1 | Загадка 1. Шифр A=1: 12 · 21 · 14 · 5 | LUNE | Первая буква L |
+| 2 | Загадка 2. Дом на спине, блестящий след | L'escargot | Медленная, с рожками, выходит в дождь |
+| **3** | **Миссия 1. Construire un véhicule** | взрослый вводит код | машинку сохранить для миссии 3 |
+| 4 | Загадка 3. J F M A M J ? | J (juillet) | Буквы слов, которые бывают 12 раз в год |
+| 5 | Загадка 4. L M M J V S ? | D (dimanche) | Подумать про школьную неделю |
+| 6 | Загадка 5. Отзеркаленные цифры 1, 2, 3, 4, ? | 5 | Закрыть правую половину рукой |
+| 7 | Загадка 6. Зубы, но не кусается | L'engrenage | Есть в часах и велосипедах |
+| **8** | **Миссия 2. Le robot assistant** | взрослый вводит код | каждый добавляет хотя бы одну деталь |
+| 9 | Загадка 7. 3 машинки по 4 колеса | 12 | 4 + 4 + 4 |
+| **10** | **Миссия 3. Le pont de secours** | взрослый вводит код | машинка из миссии 1 проезжает по мосту |
+| 11 | Загадка 8. Je monte et ne redescends jamais | L'âge | Считается в годах |
+
+Финал: «BRAVO, LA BANDE ! VOUS AVEZ RÉPARÉ LE PROJET X !», затем экран с сюрпризом: каждому свой набор LEGO.
+
+**Правила:** ошибка отбрасывает на шаг назад, но никогда не за пройденную миссию. Роли меняются после каждой миссии. Для миссий нужны только россыпь деталей LEGO (отдельно от подарочных наборов).
 
 **Бонусные вопросы** (по очереди): 10 − 3 + 5 = 12 · 5, 10, 15, ?, 25 → 20 · не насекомое → l'araignée · лапы 2 пауков → 16 · ближе всего к Солнцу → Mercure · 2 велосипеда + 1 трёхколёсный → 7 колёс · 3·1·4·5·1·21 → CADEAU · кто несёт яйца → la poule.
 
