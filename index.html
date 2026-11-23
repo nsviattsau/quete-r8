@@ -234,7 +234,8 @@ function parent(){
   <p class="small">Écrivez où vous cachez chaque pièce. C'est enregistré sur cet appareil uniquement.</p>
   <div class="parent">${STEPS.map((s,k)=>`<div><label for="h${k}">Page ${k+1} · ${s.title}</label><input id="h${k}" value="${esc(s.hide)}"></div>`).join("")}</div>
   <div class="row"><button class="big" id="save" type="button">Enregistrer</button><button class="big red" id="back" type="button">Retour</button></div>
-  <p class="small" id="saved"></p>`;
+  <p class="small" id="saved"></p>
+  <p class="small"><a href="https://github.com/nsviattsau/quete-r8#readme" target="_blank" rel="noopener">Plan de la fête et réponses (GitHub)</a></p>`;
   document.getElementById("save").onclick=()=>{STEPS.forEach((s,k)=>{const v=document.getElementById("h"+k).value.trim();if(v)s.hide=v});document.getElementById("saved").textContent=saveHides()?"Enregistré.":"Gardé pour cette séance (l'appareil ne permet pas l'enregistrement).";};
   document.getElementById("back").onclick=intro;
 }
