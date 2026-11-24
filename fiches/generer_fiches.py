@@ -115,6 +115,7 @@ ul,ol{{margin:1mm 0 2mm;padding-left:5mm}} li{{margin:.6mm 0}}
 .grid{{display:grid;grid-template-columns:1fr 1fr;gap:0}} .lab{{border:1.5px dashed #888;height:34mm;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-family:"Comic Relief",sans-serif;font-size:17pt;color:#1d3a8a;padding:3mm}}
 .lab small{{font-size:9pt;color:#d1283a;font-family:"Fira Sans",sans-serif;margin-bottom:2mm}}
 .strip{{border:1px dashed #888;padding:3mm;margin:6mm 0}} .note{{font-size:9pt;color:#555}}
+.dot{{display:inline-block;width:3.2mm;height:3.2mm;border-radius:50%;vertical-align:middle;border:1px solid #333}} .steps{{font-size:12.5pt;line-height:1.4;padding-left:7mm}} .steps li{{margin:2.5mm 0}}
 .legend span{{display:inline-block;width:10mm;height:3mm;border:1px solid #5a3d1a;margin-right:1.5mm;vertical-align:middle}}
 </style></head><body>
 
@@ -126,7 +127,7 @@ ul,ol{{margin:1mm 0 2mm;padding-left:5mm}} li{{margin:.6mm 0}}
 <ul>
 <li><b>LEGO 11036</b> (внедорожник / off-roader) и <b>11037</b> (астронавт и ракета): инструкции бесплатно на lego.com → Service → Building instructions → номер набора. Распечатайте страницы нужной модели. Инструкции внедорожника и астронавта разрежьте пополам (2 части), ракету оставьте целой.</li>
 <li>По инструкции разложите детали каждой модели по пакетикам (внедорожник и ракета — на 2 пакетика, астронавт — 1). Наклейте этикетки со страницы 3.</li>
-<li><b>Мост:</b> «река» на полу около 30 см (синяя лента или полотенце), два упора (книги, плинтус), 10 + 5 дощечек Капла. Карточку моста (стр. 2) разрежьте по пунктиру. До игры поставьте элементы <b>1–4</b> сами (это «fondations» Анатоля), рядом — стопку Капла. Обязательно соберите мост целиком один раз заранее.</li>
+<li><b>Мост Леонардо:</b> распечатайте схему с картинками (davinci_bridge.pdf, Washoe County Library, ссылка в README) — дети смотрят на картинки. 18 дощечек Капла пометьте цветными наклейками как на схеме: красные, жёлтые, зелёные, оранжевые. До игры сделайте сами <b>шаги 1–4</b> (это «fondations» Анатоля) и разберите обратно стопкой рядом — или оставьте собранными. Карточку на французском (стр. 2) разрежьте пополам: шаги 5–7 и 8–10. Обязательно соберите мост целиком один раз заранее.</li>
 <li><b>Картонная дорога</b> (стр. 4): наклейте две полоски на картон и соедините скотчем.</li>
 <li>Коробка «La boîte d'Anatole» для находок, подарочные наборы LEGO в «grande boîte».</li>
 </ul>
@@ -135,18 +136,23 @@ ul,ol{{margin:1mm 0 2mm;padding-left:5mm}} li{{margin:.6mm 0}}
 <section class="page">
 <div class="card"><div class="tag">Fiche du pont · morceau 1/2</div>
 <h2>Le pont de Léonard de Vinci</h2>
-<p class="big">Pas de clou, pas de colle : les planches se tiennent toutes seules ! Posez-les dans l'ordre des numéros. Anatole a déjà posé <b>1, 2, 3 et 4</b>.</p>
-{bridge_svg()}
-<p class="legend note"><span style="background:#c98f4a"></span>planches écartées &nbsp; <span style="background:#f0d3a0"></span>planches serrées &nbsp; <span style="background:#e9c27a"></span>traverses (numéros rouges)</p>
+<p class="big">Pas de clou, pas de colle ! Anatole a déjà fait les étapes 1 à 4. Regardez les images de la grande fiche et continuez. Une personne tient le pont à plat, une autre pose les planches.</p>
+<ol class="steps" start="5">
+<li><b>Appuyez</b> sur le pont pour le tenir à plat. Posez les planches 10 et 11 <span class="dot" style="background:#f2b632"></span> <b>jaunes</b> sur la planche <span class="dot" style="background:#e8892b"></span> orange, entre les planches <span class="dot" style="background:#d1283a"></span> rouges du bord et celles du milieu.</li>
+<li>Glissez la planche 12 <span class="dot" style="background:#1f8a4c"></span> <b>verte</b> entre les rouges et les jaunes : <b>sous</b> les rouges, <b>sur</b> les jaunes.</li>
+<li>Glissez la planche 13 <span class="dot" style="background:#e8892b"></span> <b>orange</b> <b>sous</b> les jaunes, à côté de la verte (bien parallèle).</li>
+</ol>
 </div>
 <hr class="cut">
 <div class="card"><div class="tag">Fiche du pont · morceau 2/2</div>
-<h2>Les 2 gestes à répéter</h2>
-<div class="row" style="align-items:flex-start"><div class="big" style="flex:1">
-<p><b>Geste 1.</b> Prenez 2 planches de l'autre sorte (écartées ↔ serrées). Posez leur bout arrière <b>SUR</b> la traverse qui est sur le milieu des dernières planches. Le bout avant touche le sol.</p>
-<p><b>Geste 2.</b> Soulevez un peu l'avant des dernières planches et glissez une nouvelle traverse <b>DESSOUS</b>, posée sur le milieu des nouvelles planches.</p>
-<p>Recommencez jusqu'à l'autre rive !</p></div>
-<div>{top_svg()}<p class="note" style="text-align:center;margin:0">vu d'en haut</p>{junction_svg()}</div></div>
+<h2>La fin du pont</h2>
+<ol class="steps" start="8">
+<li>Planches 14 et 15 <span class="dot" style="background:#d1283a"></span> <b>rouges</b> : <b>sous</b> l'orange, <b>sur</b> la verte.</li>
+<li>Planche 16 <span class="dot" style="background:#1f8a4c"></span> <b>verte</b> : <b>sous</b> les rouges.</li>
+<li>Planches 17 et 18 <span class="dot" style="background:#d1283a"></span> <b>rouges</b> : <b>sous</b> la verte, <b>sur</b> l'orange.</li>
+</ol>
+<p class="big"><b>Le moment magique :</b> lâchez doucement le pont… il se lève tout seul ! Ensuite, faites traverser l'astronaute.</p>
+<p class="note">Truc : <b>sous</b> = on soulève un peu la planche du dessus pour glisser la nouvelle dessous.</p>
 </div>
 </section>
 
