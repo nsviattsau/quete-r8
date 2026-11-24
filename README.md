@@ -7,8 +7,9 @@ Quête d'anniversaire interactive pour enfants (6–8 ans), dans l'esprit des av
 - Bonne réponse : tampon « Très bien ! » et la cachette de la pièce s'affiche.
 - Indice : chaque page propose un indice, mais celui qui le prend doit ensuite répondre à une question bonus.
 - Mauvaise réponse : « Oh non, encore une catastrophe ! », et on recule d'une page.
-- **Missions de construction LEGO** (3) entre les énigmes : véhicule, robot assistant, pont de secours. Chrono de 3 minutes facultatif, jamais de pénalité. Un adulte valide chaque mission avec son code secret.
-- **Rôles** : Décodeur, Constructeur, Explorateur, Vérificateur. Ils tournent après chaque mission. Pas de points ni de classement.
+- **4 chapitres, 14 énigmes, 4 constructions** : le tout-terrain et la fusée (LEGO Classic 11036 et 11037), le pilote, le pont de Léonard en Kapla. Les cachettes contiennent les sacs de briques et les morceaux de notice. Un adulte valide chaque construction avec son code secret, le chrono ne pénalise jamais.
+- **Rôles** dès la première page : Décodeur, Vérificateur, Explorateur, Constructeur. Ils tournent à chaque page. Pas de points ni de classement.
+- **Fiches à imprimer** : [fiches/fiches-a-imprimer.pdf](fiches/fiches-a-imprimer.pdf).
 - **Progression sauvegardée** : après un rafraîchissement, « Reprendre la mission ».
 - **Mode parent** (bouton en bas, protégé par le code) : prénoms, cachettes, code secret, remise à zéro. Tout est enregistré sur l'appareil.
 - Code oublié : effacer les données du site dans le navigateur (cela efface aussi les cachettes et la progression).
@@ -43,27 +44,38 @@ Projet familial non officiel, sans lien avec les auteurs ou l'éditeur d'Anatole
 
 ## Маршрут на сайте
 
-Ответы для родителей. Тайники, имена детей и код вписываются в «Mode parent». При первом запуске сайт сам попросит взрослого придумать 4-значный код.
+**Распечатать:** [fiches/fiches-a-imprimer.pdf](fiches/fiches-a-imprimer.pdf) — таблица подготовки, карточка моста Леонардо из Капла (2 части), этикетки для пакетиков, картонная дорога.
 
-| Шаг | Задание | Ответ | Подсказка (стоит бонусный вопрос) |
+«Проект X» Анатоля — ракета. 4 главы, 14 загадок, 4 стройки, около часа. Каждая загадка ведёт к тайнику, где лежит пакетик деталей или кусок инструкции. Роли меняются на каждой странице, начиная с первой.
+
+| Стр. | Задание | Ответ | Что в тайнике |
 |---|---|---|---|
-| 1 | Загадка 1. Шифр A=1: 12 · 21 · 14 · 5 | LUNE | Первая буква L |
-| 2 | Загадка 2. Дом на спине, блестящий след | L'escargot | Медленная, с рожками, выходит в дождь |
-| **3** | **Миссия 1. Construire un véhicule** | взрослый вводит код | машинку сохранить для миссии 3 |
-| 4 | Загадка 3. J F M A M J ? | J (juillet) | Буквы слов, которые бывают 12 раз в год |
-| 5 | Загадка 4. L M M J V S ? | D (dimanche) | Подумать про школьную неделю |
-| 6 | Загадка 5. Отзеркаленные цифры 1, 2, 3, 4, ? | 5 | Закрыть правую половину рукой |
-| 7 | Загадка 6. Зубы, но не кусается | L'engrenage | Есть в часах и велосипедах |
-| **8** | **Миссия 2. Le robot assistant** | взрослый вводит код | каждый добавляет хотя бы одну деталь |
-| 9 | Загадка 7. 3 машинки по 4 колеса | 12 | 4 + 4 + 4 |
-| **10** | **Миссия 3. Le pont de secours** | взрослый вводит код | машинка из миссии 1 проезжает по мосту |
-| 11 | Загадка 8. Je monte et ne redescends jamais | L'âge | Считается в годах |
+| 1 | Шифр A=1: 12 · 21 · 14 · 5 | LUNE | Пакетик №1 внедорожника |
+| 2 | Дом на спине, блестящий след | L'escargot | Пакетик №2 внедорожника |
+| 3 | J F M A M J ? | J | Инструкция внедорожника, часть 1 |
+| 4 | Красная левее синей, зелёная правее синей | La bleue | Инструкция внедорожника, часть 2 |
+| **5** | **Стройка 1: внедорожник (LEGO 11036, off-roader)** | код взрослого | машинку сохранить для моста |
+| 6 | Отзеркаленные цифры 1, 2, 3, 4, ? | 5 | Пакетик астронавта |
+| 7 | Зубы, но не кусается | L'engrenage | Инструкция астронавта, часть 1 |
+| 8 | Кольца, но не на пальцах | Saturne | Инструкция астронавта, часть 2 |
+| **9** | **Стройка 2: астронавт (LEGO 11037)** | код взрослого | каждый ставит хотя бы одну деталь |
+| 10 | L M M J V S ? | D | Карточка моста, часть 1 |
+| 11 | Живёт в воде, без лап | Le poisson | Карточка моста, часть 2 |
+| 12 | 5 опор, сколько арок? | 4 | Картонная дорога |
+| **13** | **Стройка 3: мост Леонардо из Капла** | код взрослого | астронавт переходит пешком, внедорожник едет по картонной дороге |
+| 14 | 3 машинки по 4 колеса | 12 | Пакетик №1 ракеты |
+| 15 | 10, 8, 6, 4, ? | 2 | Пакетик №2 ракеты |
+| 16 | S · É · U · F · E | FUSÉE | Инструкция ракеты |
+| **17** | **Стройка 4: ракета (LEGO 11037)**, затем «Décollage !» | код взрослого | |
+| 18 | Je monte et ne redescends jamais | L'âge | Подарки (наборы LEGO) |
 
-Финал: «BRAVO, LA BANDE ! VOUS AVEZ RÉPARÉ LE PROJET X !», затем экран с сюрпризом: каждому свой набор LEGO.
+Финал: «BRAVO, LA BANDE ! VOUS AVEZ RÉPARÉ LE PROJET X !», затем экран с сюрпризом.
 
-**Правила:** ошибка отбрасывает на шаг назад, но никогда не за пройденную миссию. Роли меняются после каждой миссии. Для миссий нужны только россыпь деталей LEGO (отдельно от подарочных наборов).
+**Инструкции LEGO** (бесплатно, распечатать страницы нужной модели): [11036 Creative Vehicles](https://www.lego.com/fr-fr/service/building-instructions/11036), [11037 Les planètes créatives](https://www.lego.com/fr-fr/service/building-instructions/11037). Детали каждой модели заранее разложить по пакетикам.
 
-**Бонусные вопросы** (по очереди): 10 − 3 + 5 = 12 · 5, 10, 15, ?, 25 → 20 · не насекомое → l'araignée · лапы 2 пауков → 16 · ближе всего к Солнцу → Mercure · 2 велосипеда + 1 трёхколёсный → 7 колёс · 3·1·4·5·1·21 → CADEAU · кто несёт яйца → la poule.
+**Мост Леонардо:** концы дощечек лежат СВЕРХУ на поперечине, середина других дощечек — ПОД ней. Начало (элементы 1–4 на карточке) взрослый ставит до игры, к упорам. Собрать мост целиком один раз заранее.
+
+**Правила:** ошибка отбрасывает на страницу назад, но никогда за пройденную стройку. Подсказка стоит бонусного вопроса. Таймер только для поддержки, без штрафа.
 
 ## Загадки и головоломки (идеи)
 

@@ -88,6 +88,15 @@ button{font:inherit;cursor:pointer}
 .gifts{margin:0;padding:0;list-style:none;display:grid;gap:8px}
 .gifts li{background:#fff4c4;padding:10px 14px;font-size:21px;border-radius:2px;transform:rotate(var(--r,0deg));box-shadow:0 3px 8px #6b5a3330}
 .page a{color:var(--ink)}
+.chap{font-family:var(--hand);font-size:18px;color:var(--red);margin-bottom:-8px}
+.turn{margin:0;background:#fff4c4;border-radius:2px;padding:6px 12px;font-size:17px;transform:rotate(-.5deg);align-self:flex-start}
+.who{font-family:var(--hand);font-size:22px;color:var(--ink)}
+.find{background:#fff;border:2px dashed var(--green);border-radius:10px;padding:10px 14px;font-size:20px}
+.find small{display:block;font-family:var(--hand);font-size:18px;color:var(--green)}
+.role .rn{display:block;font-family:var(--hand);font-size:22px;color:var(--ink);line-height:1.1}
+.role .rj{display:block}
+.contains{font-size:14px;color:var(--green)}
+.launch{font-family:var(--hand);font-size:clamp(36px,10vw,56px);color:var(--red);text-align:center}
 @media (max-width:420px){.page{padding-left:52px}.page{background-image:linear-gradient(90deg,transparent 38px,var(--margin) 38px 40px,transparent 40px),repeating-linear-gradient(0deg,transparent 0 31px,var(--seyes-strong) 31px 32px),repeating-linear-gradient(0deg,transparent 0 7px,var(--seyes) 7px 8px)}.page::after{left:10px}}
 @media (prefers-reduced-motion:reduce){body.oops .page{animation:none}.ruler i{transition:none}}
 </style>
@@ -98,7 +107,7 @@ button{font:inherit;cursor:pointer}
     <div class="step" id="stepLabel"></div>
   </header>
   <div class="ruler" aria-hidden="true"><i id="bar"></i></div>
-  <div class="ruler-label" id="barLabel">Pièces : 0 / 8 · Missions : 0 / 3</div>
+  <div class="ruler-label" id="barLabel">Énigmes : 0 / 14 · Constructions : 0 / 4</div>
   <main class="page" id="page" aria-live="polite"></main>
   <button class="link" id="parentBtn" type="button">Mode parent</button>
 </div>
@@ -113,33 +122,52 @@ const STAR=`<svg class="doodle" viewBox="0 0 140 130" aria-hidden="true"><path d
 
 const pair=(d,q)=>`<span class="pair${q?' q':''}"><span>${d}</span><span>${d}</span></span>`;
 
-const STEPS=[
- {title:"Le mot secret", text:"Pour que personne ne lise son carnet, Anatole écrit en chiffres : A = 1, B = 2, C = 3… Quel mot a-t-il écrit ?",
+/* Énigmes (id stable : les cachettes sont enregistrées par id). */
+const RIDDLES={
+ secret:{title:"Le mot secret", text:"Pour que personne ne lise son carnet, Anatole écrit en chiffres : A = 1, B = 2, C = 3… Quel mot a-t-il écrit ?",
   extra:`<div class="code">12 · 21 · 14 · 5</div>`, answers:["PUCE","LUNE","TUBE"], ok:1, hide:"Sous un coussin du canapé",
   hint:"La première lettre est le L, car L = 12. Comptez sur vos doigts à partir de A !"},
- {title:"La devinette du jardin", text:"Anatole a trouvé une petite bête dans la cour de l'école : « Je porte ma maison sur mon dos et je laisse une trace qui brille. » Qui est-ce ?",
+ escargot:{title:"La devinette du jardin", text:"Anatole a trouvé une petite bête dans la cour de l'école : « Je porte ma maison sur mon dos et je laisse une trace qui brille. » Qui est-ce ?",
   answers:["La tortue","Le hérisson","L'escargot"], ok:2, hide:"Dans le panier à chaussures de l'entrée",
   hint:"Elle est très lente, elle a des antennes et elle sort quand il pleut."},
- {title:"La suite mystère", text:"Anatole a trouvé cette suite de lettres sur le tableau de la classe. Quelle lettre vient ensuite ?",
+ mois:{title:"La suite mystère", text:"Anatole a trouvé cette suite de lettres sur le tableau de la classe. Quelle lettre vient ensuite ?",
   extra:`<div class="code">J F M A M J ?</div>`, answers:["K","J","A"], ok:1, hide:"Derrière les livres de l'étagère",
   hint:"Ce ne sont pas des lettres au hasard : ce sont les premières lettres de mots que l'on dit 12 fois par an… Janvier, Février…"},
- {title:"Encore des lettres !", text:"Sur la page suivante, une autre suite. Quelle lettre manque ?",
-  extra:`<div class="code">L M M J V S ?</div>`, answers:["T","S","D"], ok:2, hide:"Dans la boîte à jouets de la chambre",
-  hint:"Pensez à l'école : on y va le Lundi, le Mardi… C'est la semaine !"},
- {title:"Les chiffres à l'envers", text:"Anatole a écrit chaque chiffre deux fois : une fois à l'endroit, une fois dans le miroir. Quel dessin vient ensuite ?",
+ garage:{title:"Le garage d'Anatole", text:"Anatole range 3 voitures sur une ligne. La rouge est à gauche de la bleue. La verte est à droite de la bleue. Quelle voiture est au milieu ?",
+  answers:["La rouge","La bleue","La verte"], ok:1, hide:"Sous le tapis de l'entrée",
+  hint:"Dessinez trois carrés sur une ligne et coloriez-les en suivant la phrase."},
+ miroir:{title:"Les chiffres à l'envers", text:"Anatole a écrit chaque chiffre deux fois : une fois à l'endroit, une fois dans le miroir. Quel dessin vient ensuite ?",
   extra:`<div class="mirror">${pair(1)}${pair(2)}${pair(3)}${pair(4)}${pair('?',true)}</div>`,
-  answers:[pair(6),pair(5),pair(8)], ok:1, html:true, hide:"Sous la nappe de la table",
+  answers:[pair(6),pair(5),pair(8)], ok:1, hide:"Sous la nappe de la table",
   hint:"Cachez la moitié droite de chaque dessin avec votre main. Que voyez-vous : 1, 2, 3, 4… ?"},
- {title:"L'invention", text:"Dans la boîte d'Anatole, il manque une pièce : « J'ai des dents, mais je ne mords pas. Je fais tourner mes voisines. » Qu'est-ce que c'est ?",
+ engrenage:{title:"L'invention", text:"Dans la boîte d'Anatole, il manque une pièce : « J'ai des dents, mais je ne mords pas. Je fais tourner mes voisines. » Qu'est-ce que c'est ?",
   answers:["Le peigne","L'engrenage","La fusée"], ok:1, hide:"Dans la salle de bain, près des serviettes",
   hint:"On en trouve dans les montres, les vélos et les machines. C'est une petite roue."},
- {title:"Le calcul de roues", text:"Anatole veut construire 3 voitures. Chaque voiture a 4 roues. Combien de roues lui faut-il ?",
+ saturne:{title:"La planète au chapeau", text:"« J'ai des anneaux, mais je n'en porte à aucun doigt. Je suis une planète. » Qui suis-je ?",
+  answers:["Mars","Saturne","La Terre"], ok:1, hide:"Dans le panier à linge",
+  hint:"Ses anneaux sont faits de glace et de cailloux. Son nom commence par un S."},
+ jours:{title:"Encore des lettres !", text:"Sur la page suivante, une autre suite. Quelle lettre manque ?",
+  extra:`<div class="code">L M M J V S ?</div>`, answers:["T","S","D"], ok:2, hide:"Dans la boîte à jouets de la chambre",
+  hint:"Pensez à l'école : on y va le Lundi, le Mardi… C'est la semaine !"},
+ poisson:{title:"Qui vit dans la rivière ?", text:"« Je vis dans l'eau, je respire sous l'eau et je n'ai pas de pattes. » Qui suis-je ?",
+  answers:["La grenouille","Le poisson","Le canard"], ok:1, hide:"Derrière un rideau du salon",
+  hint:"La grenouille et le canard ont des pattes, et le canard respire hors de l'eau."},
+ arches:{title:"Les piliers du pont", text:"Un pont a 5 piliers sur une ligne. Entre deux piliers, il y a une arche. Combien d'arches a le pont ?",
+  answers:["4","5","6"], ok:0, hide:"Sous le lit d'Anatole (le lit d'un enfant)",
+  hint:"Dessinez 5 traits debout et comptez les espaces entre eux."},
+ roues:{title:"Le calcul de roues", text:"Anatole veut construire 3 voitures. Chaque voiture a 4 roues. Combien de roues lui faut-il ?",
   answers:["7","10","12"], ok:2, hide:"Dans le placard de la cuisine, en bas",
   hint:"Dessinez 3 voitures et comptez leurs roues : 4 + 4 + 4."},
- {title:"La dernière page", text:"« Je monte, je monte et je ne redescends jamais. Aujourd'hui, c'est ma fête ! » Qui suis-je ?",
+ compte:{title:"Le compte à rebours", text:"Pour le décollage, Anatole compte de 2 en 2 : 10, 8, 6, 4… Quel nombre vient ensuite ?",
+  answers:["3","2","0"], ok:1, hide:"Dans un tiroir de la cuisine",
+  hint:"À chaque fois, on enlève 2."},
+ fusee:{title:"Le mot mélangé", text:"Les lettres du dernier mot se sont mélangées : <b>S · É · U · F · E</b>. Remettez-les dans l'ordre !",
+  answers:["FUSÉE","FUMÉE","MUSÉE"], ok:0, hide:"Derrière la porte du salon",
+  hint:"Ça part dans l'espace avec un grand bruit de feu."},
+ age:{title:"La dernière page", text:"« Je monte, je monte et je ne redescends jamais. Aujourd'hui, c'est ma fête ! » Qui suis-je ?",
   answers:["L'âge","La fusée","L'ascenseur"], ok:0, hide:"La grande boîte finale, dans le salon",
   hint:"Ça se compte en années. Le jour de l'anniversaire, on a un an de plus !"}
-];
+};
 /* Question bonus : obligatoire quand on a pris un indice. */
 const BONUS=[
  {text:"Anatole a 10 billes. Il en perd 3, puis il en gagne 5. Combien en a-t-il ?", answers:["8","12","13"], ok:1},
@@ -151,43 +179,68 @@ const BONUS=[
  {text:"Avec A = 1, B = 2… quel mot est écrit ? 3 · 1 · 4 · 5 · 1 · 21", answers:["CADEAU","GATEAU","BATEAU"], ok:0},
  {text:"Quel animal pond des œufs ?", answers:["Le chat","La poule","Le lapin"], ok:1}
 ];
-let bonusN=0, usedHint=false;
 const OOPS=["Oh non, encore une catastrophe !","Patatras ! La boîte est tombée !","Oups ! Le carnet a pris l'eau !","Badaboum ! Tout s'est renversé !"];
 
-const KEY="anatole-cachettes-v3";
-function loadHides(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(Array.isArray(s))s.forEach((h,k)=>{if(STEPS[k]&&h)STEPS[k].hide=h});}catch(e){}}
-function saveHides(){try{localStorage.setItem(KEY,JSON.stringify(STEPS.map(s=>s.hide)));return true}catch(e){return false}}
-loadHides();
-
-/* Missions de construction LEGO (briques en vrac fournies par l'adulte). */
+/* Missions de construction : LEGO Classic 11036 et 11037, Kapla. */
 const MISSIONS=[
- {title:"Construire un véhicule", story:"Anatole a besoin d'un véhicule pour transporter les pièces de son invention. Mais son véhicule est complètement cassé !",
-  todo:["Prenez les briques LEGO que l'adulte vous donne.","Construisez ensemble un petit véhicule capable de transporter une pièce.","Gardez-le bien : il servira pour une autre mission !"],
-  check:"L'adulte vérifie que le véhicule tient et qu'il peut transporter une pièce."},
- {title:"Le robot assistant", story:"Le robot assistant d'Anatole a perdu sa forme. Aidez-le à retrouver son apparence !",
-  todo:["Construisez un petit robot avec une tête, un corps et des bras.","Chaque membre de la bande ajoute au moins une pièce.","Donnez un nom à votre robot !"],
-  check:"L'adulte vérifie que chacun a ajouté au moins une pièce."},
- {title:"Le pont de secours", story:"Pour transporter les dernières pièces, Anatole doit traverser une rivière. Construisez un pont solide !",
-  todo:["Faites deux petites tours de briques : ce sont les deux rives. Écartez-les d'une main.","Construisez ensemble un pont entre les deux rives.","Le test : faites passer le véhicule de la mission 1 sur le pont sans qu'il tombe !"],
-  check:"L'adulte vérifie que le véhicule passe sur le pont et que tout le monde a participé."}
+ {title:"Le tout-terrain", min:6, story:"Pour transporter les pièces de ma fusée jusqu'à la base de lancement, il me faut un véhicule. Mais le mien est en morceaux !",
+  todo:["Ouvrez les sacs n°1 et n°2 du tout-terrain.","Assemblez les deux morceaux de la notice.","Construisez le tout-terrain ensemble, en suivant la notice.","Gardez-le bien : il devra traverser le pont !"],
+  check:"L'adulte vérifie que le tout-terrain est complet et qu'il roule."},
+ {title:"Le pilote", min:5, story:"Une fusée sans pilote, ça ne décolle pas ! Mon astronaute s'est complètement démonté…",
+  todo:["Ouvrez le sac de l'astronaute.","Assemblez les deux morceaux de la notice.","Construisez l'astronaute. Chacun pose au moins une pièce !"],
+  check:"L'adulte vérifie que l'astronaute est complet et que chacun a posé une pièce."},
+ {title:"Le pont de Léonard", min:10, story:"Une rivière nous sépare de la base de lancement ! J'ai commencé un pont magique, sans clou et sans colle, inventé par Léonard de Vinci. Mais je n'ai pas réussi à le finir.",
+  todo:["Assemblez les deux morceaux de la fiche du pont.","Continuez le pont jusqu'à l'autre rive en répétant les 2 gestes de la fiche.","Faites traverser l'astronaute à pied sur le pont.","Posez la route en carton sur le pont et faites passer le tout-terrain !"],
+  check:"L'adulte vérifie que le pont tient tout seul et que l'astronaute a traversé."},
+ {title:"La fusée", min:8, story:"Toutes les pièces sont là ! Il ne reste plus qu'à construire le Projet X : ma fusée.",
+  todo:["Ouvrez les sacs n°1 et n°2 de la fusée.","Suivez la notice et construisez la fusée ensemble.","Posez la fusée sur la base de lancement, avec l'astronaute à côté."],
+  check:"L'adulte vérifie que la fusée est prête au décollage."}
 ];
-/* Parcours : r = énigme (index dans STEPS), m = mission (index dans MISSIONS). */
-const ROUTE=[{r:0},{r:1},{m:0},{r:2},{r:3},{r:4},{r:5},{m:1},{r:6},{m:2},{r:7}];
+/* Parcours : 4 chapitres. r = énigme (id), find = ce qu'il y a dans la cachette ; m = mission. */
+const CHAPTERS=["Le tout-terrain","Le pilote","Le pont","La fusée","La surprise"];
+const ROUTE=[
+ {c:0,r:"secret",find:"Le sac n°1 du tout-terrain"},
+ {c:0,r:"escargot",find:"Le sac n°2 du tout-terrain"},
+ {c:0,r:"mois",find:"La notice du tout-terrain, morceau 1"},
+ {c:0,r:"garage",find:"La notice du tout-terrain, morceau 2"},
+ {c:0,m:0},
+ {c:1,r:"miroir",find:"Le sac de l'astronaute"},
+ {c:1,r:"engrenage",find:"La notice de l'astronaute, morceau 1"},
+ {c:1,r:"saturne",find:"La notice de l'astronaute, morceau 2"},
+ {c:1,m:1},
+ {c:2,r:"jours",find:"La fiche du pont, morceau 1"},
+ {c:2,r:"poisson",find:"La fiche du pont, morceau 2"},
+ {c:2,r:"arches",find:"La route en carton"},
+ {c:2,m:2},
+ {c:3,r:"roues",find:"Le sac n°1 de la fusée"},
+ {c:3,r:"compte",find:"Le sac n°2 de la fusée"},
+ {c:3,r:"fusee",find:"La notice de la fusée"},
+ {c:3,m:3},
+ {c:4,r:"age",find:"Les cadeaux !"}
+];
+const RIDDLE_IDS=ROUTE.filter(x=>x.r).map(x=>x.r);
 const ROLES=[
- {name:"Le Décodeur", job:"lit la question ou la mission à voix haute"},
- {name:"Le Constructeur", job:"garde les pièces trouvées et dirige la construction"},
- {name:"L'Explorateur", job:"part chercher la cachette ou les briques"},
- {name:"Le Vérificateur", job:"vérifie que toute la bande est d'accord"}
+ {name:"Le Décodeur", short:"Décodeur", job:"lit la question à voix haute et appuie sur la réponse de la bande", jobM:"lit l'histoire et les consignes à voix haute"},
+ {name:"Le Vérificateur", short:"Vérificateur", job:"demande « Tout le monde est d'accord ? » avant qu'on appuie", jobM:"vérifie que chacun pose des pièces et que tout tient"},
+ {name:"L'Explorateur", short:"Explorateur", job:"lit la cachette et mène la bande pour la trouver", jobM:"cherche les pièces dont la bande a besoin"},
+ {name:"Le Constructeur", short:"Constructeur", job:"range ce qu'on trouve dans la boîte d'Anatole", jobM:"tient la notice et dit quelle étape on construit"}
 ];
 
-const K_PROG="anatole-progression-v1", K_NAMES="anatole-noms-v1", K_PIN="anatole-code-v1";
+/* Stockage local. */
+const K_HIDES="anatole-cachettes-v4", K_OLD="anatole-cachettes-v3", K_PROG="anatole-progression-v2", K_NAMES="anatole-noms-v1", K_PIN="anatole-code-v1";
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
 function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
+(function loadHides(){
+  let h=lsGet(K_HIDES,null);
+  if(!h){const old=lsGet(K_OLD,null);if(Array.isArray(old)){const ids=["secret","escargot","mois","jours","miroir","engrenage","roues","age"];h={};old.forEach((v,k)=>{if(v&&ids[k])h[ids[k]]=v});}}
+  if(h&&typeof h==="object")Object.keys(h).forEach(id=>{if(RIDDLES[id]&&h[id])RIDDLES[id].hide=h[id]});
+})();
+function saveHides(){const h={};RIDDLE_IDS.forEach(id=>h[id]=RIDDLES[id].hide);return lsSet(K_HIDES,h);}
 let names=lsGet(K_NAMES,null); if(!Array.isArray(names)||names.length!==4)names=["","","",""];
 let pin=String(lsGet(K_PIN,"")||"");
 
-let pos=0, phase="q", started=false, actx=null, oopsN=0, tLeft=180, tId=null;
+let pos=0, phase="q", started=false, usedHint=false, bonusN=0, oopsN=0, actx=null, tLeft=0, tId=null;
 (function loadProgress(){const p=lsGet(K_PROG,null);if(p&&p.started){pos=Math.min(Math.max(0,p.pos|0),ROUTE.length);phase=p.phase||"q";usedHint=!!p.usedHint;bonusN=p.bonusN|0;oopsN=p.oopsN|0;started=true;}})();
 function save(){lsSet(K_PROG,{pos,phase,usedHint,bonusN,oopsN,started:true});}
 function resetProgress(){pos=0;phase="q";usedHint=false;started=false;lsDel(K_PROG);}
@@ -197,7 +250,7 @@ const LETTERS=["A","B","C","D"];
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 const nameOf=j=>esc((names[j]||"").trim()||`Joueur ${j+1}`);
 function stopTimer(){if(tId){clearInterval(tId);tId=null;}}
-function show(html){stopTimer();page.innerHTML=html;}
+function show(html){stopTimer();page.innerHTML=html;window.scrollTo({top:0});}
 function shake(){document.body.classList.remove("oops");void document.body.offsetWidth;document.body.classList.add("oops");}
 
 function audio(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();}catch(e){actx=null}return actx}
@@ -205,33 +258,47 @@ function tone(f1,f2,dur,type,vol){const a=audio();if(!a)return;const o=a.createO
 function crash(){tone(400,60,.6,"sawtooth",.18);setTimeout(()=>tone(300,80,.4,"square",.1),180)}
 function yay(){tone(660,660,.12,"triangle");setTimeout(()=>tone(880,880,.12,"triangle"),120);setTimeout(()=>tone(1320,1320,.2,"triangle"),240)}
 function fanfare(){[0,160,320,480].forEach((t,n)=>setTimeout(()=>tone(523*Math.pow(1.26,n),523*Math.pow(1.26,n),.25,"triangle"),t));}
+function liftoff(){tone(80,1200,2.2,"sawtooth",.12);}
 
-/* Rôles : ils tournent d'un cran après chaque mission réussie. */
-function rot(){return ROUTE.slice(0,pos).filter(x=>x.m!=null).length;}
-function childFor(r){return ((r-rot())%4+4)%4;}
-function rolesFull(){return `<div class="roles">${ROLES.map((R,r)=>`<div class="role"><b>${R.name}</b> : ${nameOf(childFor(r))}<br>${R.job}</div>`).join("")}</div>`;}
-function rolesMini(){return `<div class="roles-mini">${ROLES.map((R,r)=>`<span>${R.name.replace(/^(Le |L')/,"")} : <b>${nameOf(childFor(r))}</b></span>`).join("")}</div>`;}
+/* Rôles : ils tournent d'un cran à chaque étape réussie, dès la première page. */
+function childFor(r){return ((r-pos)%4+4)%4;}
+function roleLine(r,mission){return `<span class="who">${nameOf(childFor(r))}</span>, ${ROLES[r].short.toLowerCase()} : ${mission?ROLES[r].jobM:ROLES[r].job}.`;}
+function rolesFull(mission){return `<div class="roles">${ROLES.map((R,r)=>`<div class="role"><b>${R.name}</b><span class="rn">${nameOf(childFor(r))}</span><span class="rj">${mission?R.jobM:R.job}</span></div>`).join("")}</div>`;}
+function rolesMini(){return `<div class="roles-mini">${ROLES.map((R,r)=>`<span>${R.short} : <b>${nameOf(childFor(r))}</b></span>`).join("")}<span class="small">Les rôles changent à chaque page.</span></div>`;}
 
 function progress(){
-  let done=pos+((phase==="reveal"||phase==="victory"||phase==="surprise")&&pos<ROUTE.length?1:0); if(done>ROUTE.length)done=ROUTE.length;
-  const seen=ROUTE.slice(0,done), r=seen.filter(x=>x.r!=null).length, m=seen.filter(x=>x.m!=null).length;
+  let done=pos; if(phase==="victory"||phase==="surprise")done=ROUTE.length;
+  const seen=ROUTE.slice(0,done), r=seen.filter(x=>x.r).length, m=seen.filter(x=>x.m!=null).length;
   document.getElementById("bar").style.width=(done/ROUTE.length*100)+"%";
-  document.getElementById("barLabel").textContent=`Pièces : ${r} / ${STEPS.length} · Missions : ${m} / ${MISSIONS.length}`;
-  document.getElementById("stepLabel").textContent=started&&pos<ROUTE.length?`Étape ${pos+1} / ${ROUTE.length}`:"";
+  document.getElementById("barLabel").textContent=`Énigmes : ${r} / ${RIDDLE_IDS.length} · Constructions : ${m} / ${MISSIONS.length}`;
+  const st=ROUTE[Math.min(pos,ROUTE.length-1)];
+  document.getElementById("stepLabel").textContent=started&&pos<ROUTE.length?`Chapitre ${st.c+1} · ${pos+1} / ${ROUTE.length}`:"";
 }
+function chapterTag(){const st=ROUTE[pos];return `<div class="chap">Chapitre ${st.c+1} · ${CHAPTERS[st.c]}</div>`;}
 
 function intro(){
-  phase=started?phase:"q";progress();document.getElementById("stepLabel").textContent="";
-  const resumeBtn=started?`<button class="big green" id="resume" type="button">Reprendre la mission (étape ${Math.min(pos+1,ROUTE.length)})</button><button class="big red" id="restart" type="button">Recommencer depuis le début</button>`:`<button class="big" id="go" type="button">Ouvrir le carnet</button>`;
+  progress();document.getElementById("stepLabel").textContent="";
+  const btns=started?`<button class="big green" id="resume" type="button">Reprendre la mission (page ${Math.min(pos+1,ROUTE.length)})</button><button class="big red" id="restart" type="button">Recommencer depuis le début</button>`:`<button class="big" id="go" type="button">Ouvrir le carnet</button>`;
   show(`${BOX}<h1>Au secours, la bande !</h1>
-  <p class="msg">Anatole préparait une invention secrète pour l'anniversaire : le Projet X. Il a voulu bien faire… et patatras ! La boîte est tombée, et toutes les pièces se sont éparpillées dans la maison.</p>
-  <p class="msg">Heureusement, il a tout noté dans son carnet. Répondez à ses questions pour trouver les pièces, et réussissez ses missions de construction.</p>
+  <p class="msg">Anatole construisait en secret une fusée pour l'anniversaire : le <b>Projet X</b>. Il a voulu bien faire… et patatras ! La boîte est tombée, et toutes les pièces se sont éparpillées dans la maison.</p>
+  <p class="msg">Heureusement, il a tout noté dans son carnet. Répondez à ses énigmes pour retrouver les sacs de pièces et les morceaux de notice, puis construisez ensemble le tout-terrain, le pilote, le pont et la fusée.</p>
   <p class="note">Attention : une mauvaise réponse, et c'est la catastrophe ! On recule d'une page.</p>
-  <div class="row">${resumeBtn}</div>`);
+  <div class="row">${btns}</div>`);
   const go=document.getElementById("go"), rs=document.getElementById("resume"), rr=document.getElementById("restart");
-  if(go)go.onclick=()=>{audio();if(!pin)setup(start);else start();};
+  if(go)go.onclick=()=>{audio();if(!pin)setup(rolesIntro);else rolesIntro();};
   if(rs)rs.onclick=()=>{audio();resume();};
   if(rr)rr.onclick=()=>{rr.textContent="Sûr ? Appuyez encore pour tout recommencer";rr.onclick=()=>{resetProgress();intro();};};
+}
+/* Présentation des rôles avant la première page. */
+function rolesIntro(){
+  pos=0;document.getElementById("stepLabel").textContent="La bande";
+  show(`<h2>Qui fait quoi dans la bande ?</h2>
+  <p class="msg">Une vraie bande, ça travaille ensemble ! Chacun a un rôle. À chaque page, les rôles tournent : tout le monde va lire, chercher, vérifier et construire.</p>
+  ${rolesFull(false)}
+  <p class="small">Pendant les constructions, les rôles changent un peu : le Décodeur lit les consignes, le Constructeur tient la notice, l'Explorateur cherche les pièces, le Vérificateur s'assure que chacun participe.</p>
+  <p class="small">Si le Décodeur ne sait pas encore bien lire, la bande l'aide !</p>
+  <button class="big" id="go" type="button">C'est parti !</button>`);
+  document.getElementById("go").onclick=start;
 }
 function start(){yay();pos=0;phase="q";usedHint=false;started=true;save();go();}
 function resume(){
@@ -241,16 +308,16 @@ function resume(){
 function go(){if(pos>=ROUTE.length)return victory();if(ROUTE[pos].m!=null)mission();else question();}
 
 /* Préparation par l'adulte : code secret + prénoms. */
+function pinInput(id){return `<input id="${id}" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off">`;}
 function setup(next){
   document.getElementById("stepLabel").textContent="Pour les adultes";
   show(`<h2>Préparation</h2>
-  <p class="msg">Avant de commencer, un adulte choisit un code secret à 4 chiffres. Il sert à valider les missions de construction et à ouvrir le Mode parent.</p>
-  <div class="parent pinbox"><div><label for="p1">Code secret</label><input id="p1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"></div>
-  <div><label for="p2">Encore une fois</label><input id="p2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"></div></div>
-  <p class="msg">Les prénoms de la bande, pour les rôles (facultatif) :</p>
+  <p class="msg">Avant de commencer, un adulte choisit un code secret à 4 chiffres. Il sert à valider les constructions et à ouvrir le Mode parent.</p>
+  <div class="parent pinbox"><div><label for="p1">Code secret</label>${pinInput("p1")}</div><div><label for="p2">Encore une fois</label>${pinInput("p2")}</div></div>
+  <p class="msg">Les prénoms de la bande, pour les rôles :</p>
   <div class="parent">${[0,1,2,3].map(j=>`<div><label for="n${j}">Enfant ${j+1}</label><input id="n${j}" value="${esc(names[j])}" autocomplete="off"></div>`).join("")}</div>
   <p class="err" id="err"></p>
-  <div class="row"><button class="big" id="ok" type="button">C'est parti !</button><button class="big red" id="back" type="button">Retour</button></div>`);
+  <div class="row"><button class="big" id="ok" type="button">Valider</button><button class="big red" id="back" type="button">Retour</button></div>`);
   document.getElementById("ok").onclick=()=>{
     const a=document.getElementById("p1").value.trim(), b=document.getElementById("p2").value.trim();
     if(!/^\d{4}$/.test(a)){document.getElementById("err").textContent="Le code doit avoir 4 chiffres.";return;}
@@ -259,11 +326,9 @@ function setup(next){
   };
   document.getElementById("back").onclick=intro;
 }
-
-/* Vérification par l'adulte avec le code secret. */
 function pinCheck(title,msg,onOk,onCancel){
   show(`<h2>${title}</h2><p class="msg">${msg}</p>
-  <div class="parent pinbox"><div><label for="pc">Code secret de l'adulte</label><input id="pc" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"></div></div>
+  <div class="parent pinbox"><div><label for="pc">Code secret de l'adulte</label>${pinInput("pc")}</div></div>
   <p class="err" id="err"></p>
   <div class="row"><button class="big green" id="ok" type="button">Valider</button><button class="big red" id="no" type="button">Retour</button></div>`);
   const inp=document.getElementById("pc");inp.focus({preventScroll:true});
@@ -273,26 +338,26 @@ function pinCheck(title,msg,onOk,onCancel){
   document.getElementById("no").onclick=onCancel;
 }
 
+function answersHTML(list){return `<div class="answers">${list.map((a,k)=>`<button class="ans" type="button" data-k="${k}"><b>${LETTERS[k]}</b><span>${a}</span></button>`).join("")}</div>`;}
 function question(){
   phase="q";save();progress();
-  const s=STEPS[ROUTE[pos].r];
-  show(`<h2>${s.title}</h2><p class="msg">${s.text}</p>${s.extra||""}
-  <div class="answers">${s.answers.map((a,k)=>`<button class="ans" type="button" data-k="${k}"><b>${LETTERS[k]}</b><span>${a}</span></button>`).join("")}</div>
+  const s=RIDDLES[ROUTE[pos].r];
+  show(`${chapterTag()}<p class="turn">${roleLine(0)}</p>
+  <h2>${s.title}</h2><p class="msg">${s.text}</p>${s.extra||""}
+  ${answersHTML(s.answers)}
+  <p class="small">${roleLine(1)}</p>
   <div class="hint" id="hintZone">${usedHint?`<div class="hint-text"><small>Indice</small>${s.hint}</div>`:`<button class="hint-btn" id="hintBtn" type="button">Besoin d'un indice ?</button><p class="small">Un indice coûte une question bonus.</p>`}</div>
   ${rolesMini()}`);
   page.querySelectorAll(".ans").forEach(b=>b.onclick=()=>answer(+b.dataset.k));
   const hb=document.getElementById("hintBtn");
   if(hb)hb.onclick=()=>{usedHint=true;save();document.getElementById("hintZone").innerHTML=`<div class="hint-text"><small>Indice</small>${s.hint}</div><p class="small">Après la bonne réponse, il faudra répondre à une question bonus.</p>`;};
-  page.querySelector(".ans").focus({preventScroll:true});
 }
-
 function bonus(){
   phase="bonus";save();progress();
   const b=BONUS[bonusN%BONUS.length];
   show(`<div class="stamp ok">Juste !</div><h2>Question bonus</h2>
-  <p class="msg">Vous avez pris un indice : répondez à cette question pour gagner la pièce.</p>
-  <p class="msg">${b.text}</p>
-  <div class="answers">${b.answers.map((a,k)=>`<button class="ans" type="button" data-k="${k}"><b>${LETTERS[k]}</b><span>${a}</span></button>`).join("")}</div>`);
+  <p class="msg">Vous avez pris un indice : répondez à cette question pour ouvrir la cachette.</p>
+  <p class="msg">${b.text}</p>${answersHTML(b.answers)}`);
   page.querySelectorAll(".ans").forEach(el=>el.onclick=()=>{
     bonusN++;
     if(+el.dataset.k===b.ok){yay();usedHint=false;reveal();}
@@ -301,72 +366,73 @@ function bonus(){
       <button class="big red" id="retry" type="button">Nouvelle question bonus</button>`);
       document.getElementById("retry").onclick=bonus;}
   });
-  page.querySelector(".ans").focus({preventScroll:true});
 }
-
 function answer(k){
-  const s=STEPS[ROUTE[pos].r];
+  const s=RIDDLES[ROUTE[pos].r];
   if(k===s.ok){yay();if(usedHint)bonus();else reveal();}
   else wrong();
 }
-
 function reveal(){
   phase="reveal";save();progress();
-  const s=STEPS[ROUTE[pos].r], last=pos===ROUTE.length-1;
+  const st=ROUTE[pos], s=RIDDLES[st.r], last=pos===ROUTE.length-1;
   show(`<div class="stamp ok">Très bien !</div>
-  <div class="hide-box"><small>${last?"La grande boîte est…":"La pièce est cachée…"}</small>${esc(s.hide)}</div>
-  <p class="small">${nameOf(childFor(2))}, l'Explorateur, mène la bande à la cachette !</p>
-  <button class="big" id="next" type="button">${last?"On a tout trouvé !":"Trouvée ! Page suivante"}</button>`);
+  <div class="hide-box"><small>${last?"La grande boîte est…":"La cachette est…"}</small>${esc(s.hide)}</div>
+  <div class="find"><small>Dans la cachette</small>${st.find}</div>
+  <p class="small">${roleLine(2)}<br>${roleLine(3)}</p>
+  <button class="big" id="next" type="button">${last?"On a tout trouvé !":"Trouvé ! Page suivante"}</button>`);
   document.getElementById("next").onclick=()=>{pos++;usedHint=false;phase="q";save();go();};
 }
-
 function wrong(){
   crash();shake();
-  const prevIsRiddle=pos>0&&ROUTE[pos-1].r!=null, back=prevIsRiddle?pos-1:pos, moved=back!==pos;
-  const msg=moved?"La page s'est envolée ! Retour à la page précédente.":(pos>0&&ROUTE[pos-1].m!=null?"Heureusement, votre construction est sauvée ! Il faut juste recommencer cette page.":"Il faut recommencer cette page.");
+  const prevIsRiddle=pos>0&&ROUTE[pos-1].r, back=prevIsRiddle?pos-1:pos, moved=back!==pos;
+  const msg=moved?"La page s'est envolée ! Retour à la page précédente. (Ce que vous avez trouvé reste dans la boîte.)":(pos>0&&ROUTE[pos-1].m!=null?"Heureusement, votre construction est sauvée ! Il faut juste recommencer cette page.":"Il faut recommencer cette page.");
   pos=back;if(moved)usedHint=false;phase="q";save();progress();
-  show(`<div class="stamp bad">${OOPS[oopsN++%OOPS.length]}</div>
-  <p class="msg">${msg}</p>
+  show(`<div class="stamp bad">${OOPS[oopsN++%OOPS.length]}</div><p class="msg">${msg}</p>
   <button class="big red" id="retry" type="button">On répare et on continue</button>`);
   document.getElementById("retry").onclick=go;
 }
 
-/* Écran de mission : histoire, consignes, rôles, chrono facultatif, validation par l'adulte. */
+/* Écran de construction. */
 function fmt(s){const m=Math.floor(s/60),r=s%60;return m+":"+String(r).padStart(2,"0");}
 function mission(){
   phase="mission";save();progress();
   const k=ROUTE[pos].m, M=MISSIONS[k];
-  show(`<div class="mission-tag">Mission de construction ${k+1} / ${MISSIONS.length}</div>
+  show(`${chapterTag()}<div class="mission-tag">Construction ${k+1} / ${MISSIONS.length}</div>
   <h2>${M.title}</h2>
   <p class="story">« ${M.story} »</p>
   <ol class="todo">${M.todo.map(t=>`<li>${t}</li>`).join("")}</ol>
-  ${rolesFull()}
-  <div class="timer"><span class="clock" id="clock">3:00</span><button class="big soft" id="tStart" type="button">Lancer le chrono</button></div>
+  ${rolesFull(true)}
+  <div class="timer"><span class="clock" id="clock">${fmt(M.min*60)}</span><button class="big soft" id="tStart" type="button">Lancer le chrono</button></div>
   <p class="small" id="tMsg">Le chrono est juste là pour encourager. Personne ne perd !</p>
   <div class="row"><button class="big green" id="done" type="button">Mission accomplie !</button><button class="big soft" id="more" type="button">Besoin d'un peu plus de temps ?</button></div>
   <p class="check">${M.check}</p>`);
-  tLeft=180;
-  const clock=document.getElementById("clock"), msg=document.getElementById("tMsg");
+  tLeft=M.min*60;
+  const clock=document.getElementById("clock"), msg=document.getElementById("tMsg"), ts=document.getElementById("tStart");
   const tick=()=>{tLeft--;clock.textContent=fmt(Math.max(0,tLeft));if(tLeft<=0){stopTimer();clock.classList.add("end");tone(523,392,.5,"sine",.12);msg.textContent="Le temps est écoulé, mais pas de panique ! Finissez tranquillement.";}};
   const run=()=>{if(!tId&&tLeft>0)tId=setInterval(tick,1000);};
-  document.getElementById("tStart").onclick=e=>{audio();e.target.disabled=true;run();};
-  document.getElementById("more").onclick=()=>{tLeft=Math.max(0,tLeft)+60;clock.textContent=fmt(tLeft);clock.classList.remove("end");msg.textContent="Une minute de plus ! Prenez votre temps.";if(document.getElementById("tStart").disabled)run();};
-  document.getElementById("done").onclick=()=>pinCheck(`Mission ${k+1} : vérification`,`${M.check} Si c'est bon, l'adulte tape son code.`,()=>{pos++;phase="mdone";save();missionDone();},mission);
+  ts.onclick=()=>{audio();ts.disabled=true;run();};
+  document.getElementById("more").onclick=()=>{tLeft=Math.max(0,tLeft)+60;clock.textContent=fmt(tLeft);clock.classList.remove("end");msg.textContent="Une minute de plus ! Prenez votre temps.";if(ts.disabled)run();};
+  document.getElementById("done").onclick=()=>pinCheck(`Construction ${k+1} : vérification`,`${M.check} Si c'est bon, l'adulte tape son code.`,()=>{pos++;phase="mdone";save();missionDone();},mission);
 }
 function missionDone(){
-  phase="mdone";save();progress();fanfare();
-  const k=ROUTE[pos-1].m;
+  phase="mdone";save();progress();
+  const k=ROUTE[pos-1].m, lastM=k===MISSIONS.length-1;
   show(`<div class="stamp mission">MISSION RÉUSSIE !</div>
-  <p class="msg">Bravo, la bande ! Mission ${k+1} terminée. Anatole est très fier de vous.</p>
-  ${k<MISSIONS.length-1?`<p class="note">On change les rôles !</p>${rolesFull()}`:`<p class="note">Il reste une dernière page du carnet…</p>`}
-  <button class="big" id="next" type="button">Page suivante</button>`);
-  document.getElementById("next").onclick=()=>{phase="q";save();go();};
+  ${lastM?`<p class="msg">La fusée est prête. Tous ensemble, comptez à voix haute et appuyez sur le bouton à « Décollage ! »</p>
+   <div class="launch" id="launch">3 · 2 · 1…</div>
+   <button class="big green" id="boom" type="button">Décollage !</button>`
+  :`<p class="msg">Bravo, la bande ! Anatole est très fier de vous.</p><p class="note">Chapitre suivant : ${CHAPTERS[ROUTE[pos].c]}</p>`}
+  <button class="big" id="next" type="button" ${lastM?"hidden":""}>Page suivante</button>`);
+  if(!lastM)fanfare();
+  const nx=document.getElementById("next");
+  nx.onclick=()=>{phase="q";save();go();};
+  const boom=document.getElementById("boom");
+  if(boom)boom.onclick=()=>{liftoff();document.getElementById("launch").textContent="DÉCOLLAGE !";boom.hidden=true;nx.hidden=false;nx.textContent="La dernière page du carnet";};
 }
-
 function victory(){
   pos=ROUTE.length;phase="victory";save();progress();document.getElementById("stepLabel").textContent="Projet X réparé";fanfare();
   show(`${STAR}<h1>BRAVO, LA BANDE ! VOUS AVEZ RÉPARÉ LE PROJET X !</h1>
-  <p class="msg">Grâce à vous, Anatole a retrouvé toutes ses pièces, et vos constructions ont sauvé son invention.</p>
+  <p class="msg">Le tout-terrain, le pilote, le pont et la fusée : grâce à vous, l'invention d'Anatole est terminée.</p>
   <button class="big green" id="gift" type="button">Découvrir la surprise</button>`);
   document.getElementById("gift").onclick=surprise;
 }
@@ -381,34 +447,32 @@ function surprise(){
 }
 
 /* Mode parent, protégé par le code secret. */
-function parent(){
-  if(!pin)return parentPanel();
-  pinCheck("Mode parent","Réservé aux adultes : tapez le code secret.",parentPanel,()=>resume());
-}
+function parent(){if(!pin)return parentPanel();pinCheck("Mode parent","Réservé aux adultes : tapez le code secret.",parentPanel,()=>resume());}
 function parentPanel(){
   stopTimer();document.getElementById("stepLabel").textContent="Mode parent";
+  const steps=ROUTE.map((st,n)=>st.r?`<div><label for="h_${st.r}">Page ${n+1} · ${RIDDLES[st.r].title}<br><span class="contains">Contient : ${st.find}</span></label><input id="h_${st.r}" value="${esc(RIDDLES[st.r].hide)}"></div>`:`<p class="small"><b>Page ${n+1} · Construction : ${MISSIONS[st.m].title}</b></p>`).join("");
   show(`<h2>Mode parent</h2>
   <p class="small">Tout est enregistré sur cet appareil uniquement.</p>
   <h3 class="sub">La bande</h3>
   <div class="parent">${[0,1,2,3].map(j=>`<div><label for="n${j}">Enfant ${j+1}</label><input id="n${j}" value="${esc(names[j])}" autocomplete="off"></div>`).join("")}</div>
   <h3 class="sub">Les cachettes</h3>
-  <div class="parent">${STEPS.map((s,k)=>`<div><label for="h${k}">Énigme ${k+1} · ${s.title}</label><input id="h${k}" value="${esc(s.hide)}"></div>`).join("")}</div>
+  <div class="parent">${steps}</div>
   <h3 class="sub">Code secret</h3>
-  <div class="parent pinbox"><div><label for="np">${pin?"Nouveau code (laisser vide pour garder l'actuel)":"Choisir un code à 4 chiffres"}</label><input id="np" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"></div></div>
+  <div class="parent pinbox"><div><label for="np">${pin?"Nouveau code (laisser vide pour garder l'actuel)":"Choisir un code à 4 chiffres"}</label>${pinInput("np")}</div></div>
   <p class="err" id="err"></p>
   <div class="row"><button class="big" id="save" type="button">Enregistrer</button><button class="big soft" id="back" type="button">Retour au jeu</button></div>
   <p class="small" id="saved"></p>
   <h3 class="sub">Progression</h3>
-  <p class="small">${started?`La quête est à l'étape ${Math.min(pos+1,ROUTE.length)} sur ${ROUTE.length}.`:"La quête n'a pas encore commencé."}</p>
+  <p class="small">${started?`La quête est à la page ${Math.min(pos+1,ROUTE.length)} sur ${ROUTE.length}.`:"La quête n'a pas encore commencé."}</p>
   <div class="row"><button class="big red" id="reset" type="button">Remettre la quête à zéro</button></div>
-  <p class="small"><a href="https://github.com/nsviattsau/quete-r8#readme" target="_blank" rel="noopener">Plan de la fête et réponses (GitHub)</a></p>`);
+  <p class="small"><a href="https://github.com/nsviattsau/quete-r8#readme" target="_blank" rel="noopener">Plan de la fête, réponses et fiches à imprimer (GitHub)</a></p>`);
   document.getElementById("save").onclick=()=>{
     const np=document.getElementById("np").value.trim();
     if(np&&!/^\d{4}$/.test(np)){document.getElementById("err").textContent="Le code doit avoir 4 chiffres.";return;}
     document.getElementById("err").textContent="";
     if(np){pin=np;lsSet(K_PIN,pin);document.getElementById("np").value="";}
     names=[0,1,2,3].map(j=>document.getElementById("n"+j).value.trim());
-    STEPS.forEach((s,k)=>{const v=document.getElementById("h"+k).value.trim();if(v)s.hide=v});
+    RIDDLE_IDS.forEach(id=>{const v=document.getElementById("h_"+id).value.trim();if(v)RIDDLES[id].hide=v});
     const ok=saveHides()&&lsSet(K_NAMES,names);
     document.getElementById("saved").textContent=ok?"Enregistré.":"Gardé pour cette séance (l'appareil ne permet pas l'enregistrement).";
   };
