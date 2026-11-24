@@ -97,6 +97,14 @@ button{font:inherit;cursor:pointer}
 .role .rj{display:block}
 .contains{font-size:14px;color:var(--green)}
 .launch{font-family:var(--hand);font-size:clamp(36px,10vw,56px);color:var(--red);text-align:center}
+.chap-row{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:-6px}
+.chap-row .chap{margin:0}
+.art{width:96px;height:auto;flex:none;transform:rotate(-3deg)}
+.blot{position:absolute;width:34px;height:34px;opacity:.16;pointer-events:none}
+.blot.b0{right:14px;bottom:18px;transform:rotate(20deg)}.blot.b1{right:22px;top:46%;transform:rotate(-40deg)}.blot.b2{left:60px;bottom:10px;transform:rotate(80deg)}
+.intro-art{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}.intro-art .doodle{align-self:auto}
+.xstamp{font-family:var(--hand);font-size:24px;line-height:1;color:var(--red);border:3px solid var(--red);border-radius:8px;padding:4px 10px;transform:rotate(9deg);text-align:center;opacity:.85}
+.xstamp small{display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
 @media (max-width:420px){.page{padding-left:52px}.page{background-image:linear-gradient(90deg,transparent 38px,var(--margin) 38px 40px,transparent 40px),repeating-linear-gradient(0deg,transparent 0 31px,var(--seyes-strong) 31px 32px),repeating-linear-gradient(0deg,transparent 0 7px,var(--seyes) 7px 8px)}.page::after{left:10px}}
 @media (prefers-reduced-motion:reduce){body.oops .page{animation:none}.ruler i{transition:none}}
 </style>
@@ -274,12 +282,27 @@ function progress(){
   const st=ROUTE[Math.min(pos,ROUTE.length-1)];
   document.getElementById("stepLabel").textContent=started&&pos<ROUTE.length?`Chapitre ${st.c+1} · ${pos+1} / ${ROUTE.length}`:"";
 }
-function chapterTag(){const st=ROUTE[pos];return `<div class="chap">Chapitre ${st.c+1} · ${CHAPTERS[st.c]}</div>`;}
+/* Dessins originaux « au stylo bleu », un par chapitre, + taches d'encre. */
+const INK='fill="none" stroke="#1d3a8a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"';
+const ART=[
+ `<svg class="art" viewBox="0 0 120 80" aria-hidden="true"><g ${INK}><path d="M14 52 L20 34 L46 30 L58 18 L88 18 L98 32 L108 36 L108 52 Z" fill="#fff4c4"/><path d="M60 22 L84 22 L90 32 L56 32 Z" fill="#dbe8fb"/><path d="M8 58 h104" stroke-dasharray="6 7" stroke-width="2"/></g><g ${INK}><circle cx="34" cy="54" r="12" fill="#fffdf6"/><circle cx="34" cy="54" r="4"/><circle cx="88" cy="54" r="12" fill="#fffdf6"/><circle cx="88" cy="54" r="4"/></g><path d="M100 26 l8 -6 M104 30 l9 -3" stroke="#d1283a" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+ `<svg class="art" viewBox="0 0 120 90" aria-hidden="true"><g ${INK}><rect x="40" y="44" width="40" height="34" rx="8" fill="#fffdf6"/><path d="M40 52 L26 66 M80 52 L94 66"/><circle cx="60" cy="28" r="20" fill="#fffdf6"/><path d="M46 26 q14 -12 28 0 q0 12 -14 12 q-14 0 -14 -12 Z" fill="#dbe8fb"/><rect x="52" y="56" width="16" height="10" rx="2" fill="#fff4c4"/></g><path d="M20 20 l3 6 l6 1 l-5 4 l1 6 l-5 -3 l-5 3 l1 -6 l-5 -4 l6 -1 Z" fill="#f2b632"/><circle cx="104" cy="18" r="3" fill="#d1283a"/></svg>`,
+ `<svg class="art" viewBox="0 0 130 80" aria-hidden="true"><path d="M8 66 q10 -6 20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="none" stroke="#5b8fd6" stroke-width="3" stroke-linecap="round"/><g ${INK} stroke-width="2.6"><path d="M10 58 L34 30 M26 52 L52 22 M44 38 L72 16 L98 30 M60 20 L86 22 M82 26 L104 52 M96 34 L120 58"/><path d="M28 38 h12 M50 24 h12 M76 22 h12 M92 32 h12" stroke="#d1283a"/></g></svg>`,
+ `<svg class="art" viewBox="0 0 90 110" aria-hidden="true"><g ${INK}><path d="M45 8 C62 24 64 52 60 76 L30 76 C26 52 28 24 45 8 Z" fill="#fffdf6"/><circle cx="45" cy="42" r="8" fill="#dbe8fb"/><path d="M30 60 L16 82 L30 78 M60 60 L74 82 L60 78" fill="#fff4c4"/><path d="M38 80 q7 22 14 0" stroke="#d1283a" fill="#f2b632"/></g><text x="45" y="70" text-anchor="middle" font-family="Gochi Hand, cursive" font-size="13" fill="#d1283a">X</text></svg>`,
+ `<svg class="art" viewBox="0 0 110 90" aria-hidden="true"><g ${INK}><rect x="20" y="38" width="70" height="44" fill="#fff4c4"/><rect x="14" y="28" width="82" height="14" fill="#fffdf6"/><path d="M55 28 V82" stroke="#d1283a"/><path d="M55 28 C40 8 26 18 40 26 M55 28 C70 8 84 18 70 26" stroke="#d1283a"/></g></svg>`
+];
+const BLOTS=[
+ `<svg class="blot" viewBox="0 0 60 60" aria-hidden="true"><path d="M30 8 C40 6 52 16 50 28 C58 34 50 50 38 48 C32 56 18 54 16 44 C4 40 8 24 18 20 C18 12 24 8 30 8 Z" fill="#1d3a8a"/><circle cx="54" cy="12" r="3" fill="#1d3a8a"/><circle cx="8" cy="52" r="2.5" fill="#1d3a8a"/></svg>`,
+ `<svg class="blot" viewBox="0 0 60 60" aria-hidden="true"><path d="M26 12 C36 4 50 12 46 24 C56 28 54 44 42 44 C40 54 24 54 22 44 C10 46 6 32 16 28 C10 20 16 12 26 12 Z" fill="#1d3a8a"/><circle cx="10" cy="10" r="3" fill="#1d3a8a"/></svg>`
+];
+const XSTAMP=`<div class="xstamp" aria-hidden="true">PROJET X<small>top secret</small></div>`;
+function chapterTag(){const st=ROUTE[pos];return `<div class="chap-row"><div class="chap">Chapitre ${st.c+1} · ${CHAPTERS[st.c]}</div>${ART[st.c]}</div>${BLOTS[pos%BLOTS.length].replace('class="blot"',`class="blot b${pos%3}"`)}`;}
+
 
 function intro(){
   progress();document.getElementById("stepLabel").textContent="";
   const btns=started?`<button class="big green" id="resume" type="button">Reprendre la mission (page ${Math.min(pos+1,ROUTE.length)})</button><button class="big red" id="restart" type="button">Recommencer depuis le début</button>`:`<button class="big" id="go" type="button">Ouvrir le carnet</button>`;
-  show(`${BOX}<h1>Au secours, la bande !</h1>
+  show(`<div class="intro-art">${BOX}${XSTAMP}</div><h1>Au secours, la bande !</h1>
   <p class="msg">Anatole construisait en secret une fusée pour l'anniversaire : le <b>Projet X</b>. Il a voulu bien faire… et patatras ! La boîte est tombée, et toutes les pièces se sont éparpillées dans la maison.</p>
   <p class="msg">Heureusement, il a tout noté dans son carnet. Répondez à ses énigmes pour retrouver les sacs de pièces et les morceaux de notice, puis construisez ensemble le tout-terrain, le pilote, le pont et la fusée.</p>
   <p class="note">Attention : une mauvaise réponse, et c'est la catastrophe ! On recule d'une page.</p>
@@ -438,7 +461,7 @@ function victory(){
 }
 function surprise(){
   phase="surprise";save();progress();document.getElementById("stepLabel").textContent="Surprise !";yay();
-  show(`${BOX}<h2>La surprise d'Anatole</h2>
+  show(`${BOX}${ART[4]}<h2>La surprise d'Anatole</h2>
   <p class="msg">Ouvrez la grande boîte : chacun y trouve son propre set LEGO, à emporter à la maison !</p>
   <ul class="gifts">${[0,1,2,3].map(j=>`<li style="--r:${[-1,1,-.5,.8][j]}deg">Un set LEGO pour ${nameOf(j)}</li>`).join("")}</ul>
   <p class="note">Joyeux anniversaire !</p>
