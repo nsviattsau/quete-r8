@@ -105,6 +105,10 @@ button{font:inherit;cursor:pointer}
 .intro-art{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}.intro-art .doodle{align-self:auto}
 .xstamp{font-family:var(--hand);font-size:24px;line-height:1;color:var(--red);border:3px solid var(--red);border-radius:8px;padding:4px 10px;transform:rotate(9deg);text-align:center;opacity:.85}
 .xstamp small{display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.head-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.voice{display:inline-flex;align-items:center;gap:6px;background:var(--paper);color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:4px 12px 4px 8px;font-family:var(--hand);font-size:18px;box-shadow:2px 2px 0 var(--seyes-strong)}
+.voice svg{width:20px;height:20px}.voice[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.voice:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 @media (max-width:420px){.page{padding-left:52px}.page{background-image:linear-gradient(90deg,transparent 38px,var(--margin) 38px 40px,transparent 40px),repeating-linear-gradient(0deg,transparent 0 31px,var(--seyes-strong) 31px 32px),repeating-linear-gradient(0deg,transparent 0 7px,var(--seyes) 7px 8px)}.page::after{left:10px}}
 @media (prefers-reduced-motion:reduce){body.oops .page{animation:none}.ruler i{transition:none}}
 </style>
@@ -112,7 +116,7 @@ button{font:inherit;cursor:pointer}
 <div class="wrap">
   <header>
     <div class="brand">Le carnet d'Anatole</div>
-    <div class="step" id="stepLabel"></div>
+    <div class="head-right"><div class="step" id="stepLabel"></div><button class="voice" id="voiceBtn" type="button" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="voiceLbl">Écouter Anatole</span></button></div>
   </header>
   <div class="ruler" aria-hidden="true"><i id="bar"></i></div>
   <div class="ruler-label" id="barLabel">Énigmes : 0 / 14 · Constructions : 0 / 4</div>
@@ -258,7 +262,7 @@ const LETTERS=["A","B","C","D"];
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
 const nameOf=j=>esc((names[j]||"").trim()||`Joueur ${j+1}`);
 function stopTimer(){if(tId){clearInterval(tId);tId=null;}}
-function show(html){stopTimer();page.innerHTML=html;window.scrollTo({top:0});}
+function show(html){stopTimer();if(typeof stopVoice==="function")stopVoice();page.innerHTML=html;window.scrollTo({top:0});}
 function shake(){document.body.classList.remove("oops");void document.body.offsetWidth;document.body.classList.add("oops");}
 
 function audio(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();}catch(e){actx=null}return actx}
@@ -503,6 +507,32 @@ function parentPanel(){
   const rb=document.getElementById("reset");
   rb.onclick=()=>{rb.textContent="Sûr ? Appuyez encore pour remettre à zéro";rb.onclick=()=>{resetProgress();intro();};};
 }
+
+/* Voix d'Anatole : synthèse vocale du navigateur (français, voix un peu aiguë). */
+const VOICE={ok:"speechSynthesis" in window&&"SpeechSynthesisUtterance" in window, v:null, on:false};
+function pickVoice(){if(!VOICE.ok)return;const vs=speechSynthesis.getVoices();VOICE.v=vs.find(v=>/^fr(-|_)FR/i.test(v.lang))||vs.find(v=>/^fr/i.test(v.lang))||null;}
+if(VOICE.ok){pickVoice();try{speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}}
+function pageText(){
+  const parts=[];
+  page.querySelectorAll("h1,h2,.stamp,.story,.msg,.code,.note,.hide-box,.find,.todo li,.ans,.hint-text,.launch").forEach(el=>{
+    if(el.closest(".parent")||el.closest(".roles"))return;
+    if(el.classList.contains("ans")){const L=el.querySelector("b").textContent, t=el.querySelector("span");parts.push(t.querySelector(".pair")?`Réponse ${L}.`:`Réponse ${L} : ${t.textContent}.`);return;}
+    if(el.classList.contains("hide-box")||el.classList.contains("find")||el.classList.contains("hint-text")){const sm=el.querySelector("small");parts.push((sm?sm.textContent+" ":"")+[...el.childNodes].filter(n=>n!==sm).map(n=>n.textContent).join(" "));return;}
+    parts.push(el.textContent.replace(/[«»]/g,"").replace(/\s+/g," ").trim());
+  });
+  return parts.filter(Boolean).join(" … ").replace(/ · /g,", ");
+}
+function stopVoice(){if(!VOICE.ok)return;try{speechSynthesis.cancel();}catch(e){}VOICE.on=false;setVoiceBtn();}
+function setVoiceBtn(){const b=document.getElementById("voiceBtn");b.setAttribute("aria-pressed",VOICE.on?"true":"false");document.getElementById("voiceLbl").textContent=VOICE.on?"Arrêter":"Écouter Anatole";}
+function speak(){
+  if(!VOICE.ok)return;
+  if(VOICE.on){stopVoice();return;}
+  const u=new SpeechSynthesisUtterance(pageText());
+  u.lang="fr-FR";if(VOICE.v)u.voice=VOICE.v;u.pitch=1.6;u.rate=.95;
+  u.onend=u.onerror=()=>{VOICE.on=false;setVoiceBtn();};
+  try{speechSynthesis.cancel();speechSynthesis.speak(u);VOICE.on=true;setVoiceBtn();}catch(e){VOICE.on=false;setVoiceBtn();}
+}
+if(VOICE.ok){const vb=document.getElementById("voiceBtn");vb.hidden=false;vb.onclick=speak;}
 document.getElementById("parentBtn").onclick=parent;
 intro();
 </script>

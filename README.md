@@ -10,6 +10,7 @@ Quête d'anniversaire interactive pour enfants (6–8 ans), dans l'esprit des av
 - **4 chapitres, 14 énigmes, 4 constructions** : le tout-terrain et la fusée (LEGO Classic 11036 et 11037), le pilote, le pont de Léonard en Kapla. Les cachettes contiennent les sacs de briques et les morceaux de notice. Un adulte valide chaque construction avec son code secret, le chrono ne pénalise jamais.
 - **Rôles** dès la première page : Décodeur, Vérificateur, Explorateur, Constructeur. Ils tournent à chaque page. Pas de points ni de classement.
 - **Fiches à imprimer** : [fiches/fiches-a-imprimer.pdf](fiches/fiches-a-imprimer.pdf).
+- **Voix d'Anatole** : bouton « Écouter Anatole » en haut, la page est lue en français par la voix du navigateur.
 - **Progression sauvegardée** : après un rafraîchissement, « Reprendre la mission ».
 - **Mode parent** (bouton en bas, protégé par le code) : prénoms, cachettes, code secret, remise à zéro. Tout est enregistré sur l'appareil.
 - Code oublié : effacer les données du site dans le navigateur (cela efface aussi les cachettes et la progression).
