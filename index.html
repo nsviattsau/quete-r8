@@ -527,10 +527,22 @@ function setVoiceBtn(){const b=document.getElementById("voiceBtn");b.setAttribut
 function speak(){
   if(!VOICE.ok)return;
   if(VOICE.on){stopVoice();return;}
-  const u=new SpeechSynthesisUtterance(pageText());
-  u.lang="fr-FR";if(VOICE.v)u.voice=VOICE.v;u.pitch=1.6;u.rate=.95;
-  u.onend=u.onerror=()=>{VOICE.on=false;setVoiceBtn();};
-  try{speechSynthesis.cancel();speechSynthesis.speak(u);VOICE.on=true;setVoiceBtn();}catch(e){VOICE.on=false;setVoiceBtn();}
+  if(!VOICE.v)pickVoice();
+  /* Phrases courtes : certains navigateurs s'arrêtent sur les textes longs. */
+  const chunks=pageText().split(/(?<=[.!?…])\s+/).map(x=>x.replace(/^…\s*/,"").trim()).filter(x=>x&&x!=="…");
+  if(!chunks.length)return;
+  VOICE.on=true;setVoiceBtn();
+  try{if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel();}catch(e){}
+  setTimeout(()=>{
+    chunks.forEach((c,n)=>{
+      const u=new SpeechSynthesisUtterance(c);
+      u.lang="fr-FR";if(VOICE.v)u.voice=VOICE.v;u.pitch=1.5;u.rate=.95;u.volume=1;
+      if(n===chunks.length-1)u.onend=()=>{VOICE.on=false;setVoiceBtn();};
+      u.onerror=()=>{VOICE.on=false;setVoiceBtn();};
+      try{speechSynthesis.speak(u);}catch(e){VOICE.on=false;setVoiceBtn();}
+    });
+    try{speechSynthesis.resume();}catch(e){}
+  },120);
 }
 if(VOICE.ok){const vb=document.getElementById("voiceBtn");vb.hidden=false;vb.onclick=speak;}
 document.getElementById("parentBtn").onclick=parent;
