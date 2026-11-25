@@ -63,6 +63,8 @@ button{font:inherit;cursor:pointer}
 .link{background:none;border:0;color:var(--pencil);text-decoration:underline;font-size:15px;align-self:center}
 .parent{display:flex;flex-direction:column;gap:12px}
 .parent label{display:block;font-size:15px;margin-bottom:3px}
+.parent select{width:100%;box-sizing:border-box;background:#fff;color:var(--pencil);border:1px solid var(--seyes-strong);border-radius:6px;padding:9px;font:inherit;font-size:16px}
+.parent input[type=range]{padding:0;accent-color:var(--ink)}
 .parent input{width:100%;box-sizing:border-box;background:#fff;color:var(--pencil);border:1px solid var(--seyes-strong);border-radius:6px;padding:9px;font:inherit;font-size:17px}
 .row{display:flex;gap:10px;flex-wrap:wrap}
 .small{font-size:15px;margin:0}
@@ -484,6 +486,12 @@ function parentPanel(){
   <div class="parent">${[0,1,2,3].map(j=>`<div><label for="n${j}">Enfant ${j+1}</label><input id="n${j}" value="${esc(names[j])}" autocomplete="off"></div>`).join("")}</div>
   <h3 class="sub">Les cachettes</h3>
   <div class="parent">${steps}</div>
+  <h3 class="sub">La voix d'Anatole</h3>
+  ${VOICE.ok?`<div class="parent"><div><label for="vName">Voix</label><select id="vName">${frVoices().sort((x,y)=>voiceScore(y)-voiceScore(x)).map(v=>`<option value="${esc(v.name)}" ${VOICE.v&&VOICE.v.name===v.name?"selected":""}>${esc(v.name)}</option>`).join("")||'<option value="">Voix française par défaut</option>'}</select></div>
+  <div><label for="vRate">Vitesse : <span id="vRateV">${VOICE.cfg.rate}</span></label><input id="vRate" type="range" min="0.8" max="1.6" step="0.05" value="${VOICE.cfg.rate}"></div>
+  <div><label for="vPitch">Hauteur : <span id="vPitchV">${VOICE.cfg.pitch}</span></label><input id="vPitch" type="range" min="0.8" max="2" step="0.05" value="${VOICE.cfg.pitch}"></div></div>
+  <div class="row"><button class="big soft" id="vTest" type="button">Tester la voix</button></div>
+  <p class="small">Les voix marquées « améliorée », « premium » ou « Google » sonnent moins comme un robot.</p>`:`<p class="small">Ce navigateur ne sait pas lire à voix haute.</p>`}
   <h3 class="sub">Code secret</h3>
   <div class="parent pinbox"><div><label for="np">${pin?"Nouveau code (laisser vide pour garder l'actuel)":"Choisir un code à 4 chiffres"}</label>${pinInput("np")}</div></div>
   <p class="err" id="err"></p>
@@ -503,14 +511,23 @@ function parentPanel(){
     const ok=saveHides()&&lsSet(K_NAMES,names);
     document.getElementById("saved").textContent=ok?"Enregistré.":"Gardé pour cette séance (l'appareil ne permet pas l'enregistrement).";
   };
+  if(VOICE.ok){
+    const vn=document.getElementById("vName"),vr=document.getElementById("vRate"),vp=document.getElementById("vPitch");
+    const apply=()=>{VOICE.cfg={name:vn.value,rate:+vr.value,pitch:+vp.value};document.getElementById("vRateV").textContent=vr.value;document.getElementById("vPitchV").textContent=vp.value;lsSet(K_VOICE,VOICE.cfg);pickVoice();};
+    vn.onchange=vr.oninput=vp.oninput=apply;
+    document.getElementById("vTest").onclick=()=>{apply();try{speechSynthesis.cancel();}catch(e){}setTimeout(()=>{const u=new SpeechSynthesisUtterance("Bonjour la bande ! C'est moi, Anatole. Oh non, encore une catastrophe !");u.lang="fr-FR";try{if(VOICE.v)u.voice=VOICE.v;}catch(e){}u.rate=VOICE.cfg.rate;u.pitch=VOICE.cfg.pitch;speechSynthesis.speak(u);},120);};
+  }
   document.getElementById("back").onclick=()=>resume();
   const rb=document.getElementById("reset");
   rb.onclick=()=>{rb.textContent="Sûr ? Appuyez encore pour remettre à zéro";rb.onclick=()=>{resetProgress();intro();};};
 }
 
 /* Voix d'Anatole : synthèse vocale du navigateur (français, voix un peu aiguë). */
-const VOICE={ok:"speechSynthesis" in window&&"SpeechSynthesisUtterance" in window, v:null, on:false};
-function pickVoice(){if(!VOICE.ok)return;const vs=speechSynthesis.getVoices();VOICE.v=vs.find(v=>/^fr(-|_)FR/i.test(v.lang))||vs.find(v=>/^fr/i.test(v.lang))||null;}
+const K_VOICE="anatole-voix-v1";
+const VOICE={ok:"speechSynthesis" in window&&"SpeechSynthesisUtterance" in window, v:null, on:false, cfg:Object.assign({name:"",rate:1.15,pitch:1.2},lsGet(K_VOICE,{}))};
+function frVoices(){try{return speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang));}catch(e){return [];}}
+function voiceScore(v){const n=v.name.toLowerCase();let sc=0;if(/fr[-_]fr/i.test(v.lang))sc+=2;if(/premium|enhanced|améliorée|amélioré|natural|neural|online/.test(n))sc+=5;if(/google/.test(n))sc+=3;if(/amélie|audrey|thomas|denise|henri|eloise|vivienne/.test(n))sc+=1;if(/compact|eloquence|grandma|grandpa|rocko|shelley|flo|reed|sandy/.test(n))sc-=4;return sc;}
+function pickVoice(){if(!VOICE.ok)return;const vs=frVoices();VOICE.v=vs.find(v=>v.name===VOICE.cfg.name)||vs.slice().sort((x,y)=>voiceScore(y)-voiceScore(x))[0]||null;}
 if(VOICE.ok){pickVoice();try{speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}}
 function pageText(){
   const parts=[];
@@ -520,7 +537,7 @@ function pageText(){
     if(el.classList.contains("hide-box")||el.classList.contains("find")||el.classList.contains("hint-text")){const sm=el.querySelector("small");parts.push((sm?sm.textContent+" ":"")+[...el.childNodes].filter(n=>n!==sm).map(n=>n.textContent).join(" "));return;}
     parts.push(el.textContent.replace(/[«»]/g,"").replace(/\s+/g," ").trim());
   });
-  return parts.filter(Boolean).join(" … ").replace(/ · /g,", ");
+  return parts.filter(Boolean).map(x=>/[.!?…:]$/.test(x)?x:x+".").join(" ").replace(/ · /g,", ").replace(/…/g,".");
 }
 function stopVoice(){if(!VOICE.ok)return;try{speechSynthesis.cancel();}catch(e){}VOICE.on=false;setVoiceBtn();}
 function setVoiceBtn(){const b=document.getElementById("voiceBtn");b.setAttribute("aria-pressed",VOICE.on?"true":"false");document.getElementById("voiceLbl").textContent=VOICE.on?"Arrêter":"Écouter Anatole";}
@@ -529,14 +546,15 @@ function speak(){
   if(VOICE.on){stopVoice();return;}
   if(!VOICE.v)pickVoice();
   /* Phrases courtes : certains navigateurs s'arrêtent sur les textes longs. */
-  const chunks=pageText().split(/(?<=[.!?…])\s+/).map(x=>x.replace(/^…\s*/,"").trim()).filter(x=>x&&x!=="…");
+  const sent=pageText().split(/(?<=[.!?])\s+/).map(x=>x.trim()).filter(Boolean), chunks=[];
+  sent.forEach(x=>{const l=chunks.length-1;if(l>=0&&(chunks[l]+" "+x).length<180)chunks[l]+=" "+x;else chunks.push(x);});
   if(!chunks.length)return;
   VOICE.on=true;setVoiceBtn();
   try{if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel();}catch(e){}
   setTimeout(()=>{
     chunks.forEach((c,n)=>{
       const u=new SpeechSynthesisUtterance(c);
-      u.lang="fr-FR";if(VOICE.v)u.voice=VOICE.v;u.pitch=1.5;u.rate=.95;u.volume=1;
+      u.lang="fr-FR";try{if(VOICE.v)u.voice=VOICE.v;}catch(e){}u.pitch=VOICE.cfg.pitch;u.rate=VOICE.cfg.rate;u.volume=1;
       if(n===chunks.length-1)u.onend=()=>{VOICE.on=false;setVoiceBtn();};
       u.onerror=()=>{VOICE.on=false;setVoiceBtn();};
       try{speechSynthesis.speak(u);}catch(e){VOICE.on=false;setVoiceBtn();}
